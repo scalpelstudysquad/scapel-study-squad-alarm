@@ -1,0 +1,1 @@
+# scapel-study-squad-alarm

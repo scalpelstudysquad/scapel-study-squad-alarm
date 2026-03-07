@@ -1,6 +1,6 @@
 {
   "name": "Scalpel Study Squad Alarm",
-  "short_name": "Scalpel Alarm",
+  "short_name": "Scalpel Study Squad Alarm",
   "description": "Medical PG exam alarm — answer 15 MCQs to dismiss! For NEET PG, INICET, FMGE & UPSC CMS aspirants.",
   "start_url": "/",
   "scope": "/",

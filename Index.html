@@ -477,7 +477,7 @@ input[type="range"]::-webkit-slider-thumb{
 .badge-subject{background:rgba(255,167,38,.1);color:#FFA726;border:1px solid rgba(255,167,38,.3)}
 .quiz-question-text{font-size:15px;font-weight:700;line-height:1.55;margin-bottom:14px;color:var(--text)}
 
-/* ── QUIZ QUESTION IMAGE ─────────────────────────── NEW ─── */
+/* ── QUIZ QUESTION IMAGE ─────────────────────────── */
 .quiz-img-wrap{
   text-align:center;margin:0 0 16px;
 }
@@ -487,6 +487,22 @@ input[type="range"]::-webkit-slider-thumb{
   max-height:260px;object-fit:contain;
   background:var(--surface2);
 }
+
+/* ── EXPLANATION IMAGE ───────────────────────────── */
+.exp-img-wrap{
+  text-align:center;margin:10px 0 0;
+}
+.exp-img{
+  max-width:100%;border-radius:8px;
+  border:1px solid var(--border);
+  max-height:240px;object-fit:contain;
+  background:var(--surface2);
+}
+
+/* ── EXPLANATION HTML STYLING ────────────────────── */
+.explanation-text strong,.explanation-text b{font-weight:800;color:var(--text)}
+.explanation-text p{margin-bottom:6px}
+.explanation-text p:last-child{margin-bottom:0}
 
 .options-list{display:flex;flex-direction:column;gap:8px}
 .option-item{
@@ -798,7 +814,6 @@ input[type="range"]::-webkit-slider-thumb{
   <div class="sticky-top">
     <div class="app-header">
       <div class="header-brand">
-        <!-- ★ UPDATED LOGO ★ -->
         <img class="app-logo-img" src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="Scalpel">
         <div class="app-title">Scalpel Study Squad Alarm</div>
       </div>
@@ -1121,7 +1136,6 @@ input[type="range"]::-webkit-slider-thumb{
   <div class="alarm-overlay-content">
     <div class="alarm-icon-ring">
       <div class="alarm-icon-inner">
-        <!-- ★ UPDATED LOGO ★ -->
         <img src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="Scalpel">
       </div>
     </div>
@@ -1829,6 +1843,7 @@ function startQuiz() {
   renderQuestion();
 }
 
+// ── FIX 1: renderQuestion now uses question_images array ───
 function renderQuestion() {
   const q = quizQueue[currentQIdx], total = quizQueue.length;
   document.getElementById('q-current').textContent = currentQIdx + 1;
@@ -1838,6 +1853,13 @@ function renderQuestion() {
   btn.textContent = currentQIdx === total-1 ? 'See Results 🎯' : 'Next →';
   const body = document.getElementById('quiz-body');
   const letters = ['A','B','C','D','E'];
+
+  // Support both question_images array (new JSON) and legacy q.image field
+  const qImgs = q.question_images || (q.image ? [q.image] : []);
+  const qImgHtml = qImgs.length
+    ? qImgs.map(src => `<div class="quiz-img-wrap"><img src="${src}" class="quiz-img" onerror="this.parentElement.style.display='none'" alt="Question image"></div>`).join('')
+    : '';
+
   body.innerHTML = `
     <div class="quiz-meta">
       ${q.exam ? `<span class="quiz-meta-badge badge-exam">${escHtml(q.exam)}</span>` : ''}
@@ -1845,7 +1867,7 @@ function renderQuestion() {
       ${q.subject ? `<span class="quiz-meta-badge badge-subject">${escHtml(q.subject)}</span>` : ''}
     </div>
     <div class="quiz-question-text">${escHtml(q.question)}</div>
-    ${q.image ? `<div class="quiz-img-wrap"><img src="${q.image}" class="quiz-img" onerror="this.parentElement.style.display='none'" alt="Question image"></div>` : ''}
+    ${qImgHtml}
     <div class="options-list">
       ${(q.options||[]).map((opt,i) => `
         <div class="option-item" onclick="selectOption(${i})" data-idx="${i}">
@@ -1860,6 +1882,7 @@ function renderQuestion() {
   body.scrollTop = 0;
 }
 
+// ── FIX 2: selectOption renders explanation as HTML + shows explanation_images ───
 function selectOption(idx) {
   if (document.getElementById('btn-next').classList.contains('active')) return;
   const q = quizQueue[currentQIdx];
@@ -1869,10 +1892,31 @@ function selectOption(idx) {
   items[idx].classList.add('selected');
   if (idx === correct) { items[idx].classList.add('correct'); correctCount++; document.getElementById('q-correct-live').textContent = correctCount; }
   else { items[idx].classList.add('wrong'); if (items[correct]) items[correct].classList.add('correct'); }
+
   if (q.explanation) {
-    document.getElementById('explanation-text').textContent = q.explanation;
+    const expEl = document.getElementById('explanation-text');
+    // Render as HTML so <strong>, <p> tags display properly
+    expEl.innerHTML = q.explanation;
+
+    // Append explanation images if present
+    const expImgs = q.explanation_images || [];
+    if (expImgs.length) {
+      expImgs.forEach(src => {
+        const wrap = document.createElement('div');
+        wrap.className = 'exp-img-wrap';
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'exp-img';
+        img.alt = 'Explanation image';
+        img.onerror = () => { wrap.style.display = 'none'; };
+        wrap.appendChild(img);
+        expEl.appendChild(wrap);
+      });
+    }
+
     document.getElementById('explanation-box').classList.add('visible');
   }
+
   document.getElementById('btn-next').classList.add('active');
   document.querySelector('.quiz-body').scrollTop = 9999;
 }
@@ -2073,7 +2117,6 @@ function renderDailyLog(logs) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">No sessions yet</td></tr>`;
     return;
   }
-  // Group by date
   const byDate = {};
   logs.forEach(l => {
     if (!byDate[l.date]) byDate[l.date] = { hrs:0, cycles:0, mcqs:0, subjects:new Set() };

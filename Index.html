@@ -475,7 +475,19 @@ input[type="range"]::-webkit-slider-thumb{
 .badge-exam{background:var(--psoft);color:var(--primary);border:1px solid var(--primary)}
 .badge-year{background:rgba(102,187,106,.1);color:#66BB6A;border:1px solid rgba(102,187,106,.3)}
 .badge-subject{background:rgba(255,167,38,.1);color:#FFA726;border:1px solid rgba(255,167,38,.3)}
-.quiz-question-text{font-size:15px;font-weight:700;line-height:1.55;margin-bottom:18px;color:var(--text)}
+.quiz-question-text{font-size:15px;font-weight:700;line-height:1.55;margin-bottom:14px;color:var(--text)}
+
+/* ── QUIZ QUESTION IMAGE ─────────────────────────── NEW ─── */
+.quiz-img-wrap{
+  text-align:center;margin:0 0 16px;
+}
+.quiz-img{
+  max-width:100%;border-radius:10px;
+  border:1px solid var(--border);
+  max-height:260px;object-fit:contain;
+  background:var(--surface2);
+}
+
 .options-list{display:flex;flex-direction:column;gap:8px}
 .option-item{
   padding:13px 14px;background:var(--surface);
@@ -742,7 +754,7 @@ input[type="range"]::-webkit-slider-thumb{
   background:var(--nav-bg);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--border);
-  display:none; /* hidden — alarm/daily controlled by main tabs */
+  display:none;
   align-items:flex-start;padding-top:5px;
   flex-shrink:0;z-index:20;
 }
@@ -786,7 +798,8 @@ input[type="range"]::-webkit-slider-thumb{
   <div class="sticky-top">
     <div class="app-header">
       <div class="header-brand">
-        <img class="app-logo-img" src="https://github.com/dhruvathaare/Scaslpel-Study-Squad-Apps/blob/main/photo_2026-02-12_20-08-36.jpg?raw=true" alt="Scalpel">
+        <!-- ★ UPDATED LOGO ★ -->
+        <img class="app-logo-img" src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="Scalpel">
         <div class="app-title">Scalpel Study Squad Alarm</div>
       </div>
       <div class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌗</div>
@@ -1108,7 +1121,8 @@ input[type="range"]::-webkit-slider-thumb{
   <div class="alarm-overlay-content">
     <div class="alarm-icon-ring">
       <div class="alarm-icon-inner">
-        <img src="https://github.com/dhruvathaare/Scaslpel-Study-Squad-Apps/blob/main/photo_2026-02-12_20-08-36.jpg?raw=true" alt="Scalpel">
+        <!-- ★ UPDATED LOGO ★ -->
+        <img src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="Scalpel">
       </div>
     </div>
     <div class="alarm-now-time" id="alarm-now-time">06:00 AM</div>
@@ -1240,7 +1254,7 @@ const EXAM_DATES = {
   'neet':     new Date('2026-08-30T00:00:00+05:30'),
   'ini-jan':  new Date('2026-11-01T00:00:00+05:30'),
   'fmge-jun': new Date('2026-06-28T00:00:00+05:30'),
-  'fmge-dec': null // TBA
+  'fmge-dec': null
 };
 
 function updateExamTracker() {
@@ -1283,7 +1297,7 @@ let editingAlarmId = null;
 // ── DAILY STATE ────────────────────────────────────────────
 const DAILY_KEY = 'scalpel_daily_logs';
 let timerInterval = null;
-let dailyMode = 'idle'; // idle / study / break
+let dailyMode = 'idle';
 let dailyTimeLeft = 0;
 let dailyInitDuration = 0;
 let dailyElapsed = 0;
@@ -1831,6 +1845,7 @@ function renderQuestion() {
       ${q.subject ? `<span class="quiz-meta-badge badge-subject">${escHtml(q.subject)}</span>` : ''}
     </div>
     <div class="quiz-question-text">${escHtml(q.question)}</div>
+    ${q.image ? `<div class="quiz-img-wrap"><img src="${q.image}" class="quiz-img" onerror="this.parentElement.style.display='none'" alt="Question image"></div>` : ''}
     <div class="options-list">
       ${(q.options||[]).map((opt,i) => `
         <div class="option-item" onclick="selectOption(${i})" data-idx="${i}">
@@ -1901,7 +1916,7 @@ async function loadQuestions() {
 }
 function updateQBankInfo() {
   const el = document.getElementById('qbank-info');
-  if (el) el.textContent = questions.length > 0 ? `${questions.length} questions loaded` : 'Using 30 sample questions';
+  if (el) el.textContent = questions.length > 0 ? `${questions.length} questions loaded` : 'Using sample questions';
 }
 function showQBankInfo() {
   const total = questions.length > 0 ? questions.length : SAMPLE_QUESTIONS.length;
@@ -1993,11 +2008,9 @@ function openMcqPopup() {
   document.getElementById('cycleMcqs').value = '';
   document.getElementById('mcq-popup-bg').classList.add('visible');
 }
-
 function openBreakPopup() {
   document.getElementById('break-popup-bg').classList.add('visible');
 }
-
 function closeDailyPopups() {
   document.getElementById('mcq-popup-bg').classList.remove('visible');
   document.getElementById('break-popup-bg').classList.remove('visible');
@@ -2046,186 +2059,172 @@ function renderDailyUI() {
   const now = Date.now();
   if (now - lastDailyRender < 300) return;
   lastDailyRender = now;
-  renderDailyCharts();
-  renderLogTable();
-  renderPhaseMatrix();
-}
-
-function changeViewMonth(offset) {
-  currentViewDate.setMonth(currentViewDate.getMonth() + offset);
-  renderDailyUI();
-}
-
-function getChartColors() {
-  const light = document.documentElement.getAttribute('data-theme') === 'light';
-  return {
-    text: light ? '#0A1929' : '#E3F2FD',
-    grid: light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'
-  };
-}
-
-function renderDailyCharts() {
   const logs = JSON.parse(localStorage.getItem(DAILY_KEY) || '[]');
-  const vm = currentViewDate.getMonth(), vy = currentViewDate.getFullYear();
-  const mNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const mEl = document.getElementById('monthDisplay');
-  if (mEl) mEl.textContent = `${mNames[vm]} ${vy}`;
-  const days = new Date(vy, vm+1, 0).getDate();
-  const labels = Array.from({length:days}, (_,i) => i+1);
-  const hoursData = new Array(days).fill(0);
-  const mcqData = new Array(days).fill(0);
-  logs.forEach(l => {
-    const parts = l.date.split('/');
-    if (parts.length !== 3) return;
-    if (parseInt(parts[1])-1 === vm && parseInt(parts[2]) === vy) {
-      const idx = parseInt(parts[0])-1;
-      if (idx >= 0 && idx < days) {
-        hoursData[idx] += (l.duration||0)/60;
-        mcqData[idx] += (l.mcqs||0);
-      }
-    }
-  });
-  const C = getChartColors();
-  const opts = (color, yLabel) => ({
-    responsive:true, maintainAspectRatio:false,
-    scales:{
-      y:{beginAtZero:true, ticks:{color:C.text,font:{size:9}}, grid:{color:C.grid}},
-      x:{ticks:{color:C.text,font:{size:8}}, grid:{color:C.grid}}
-    },
-    plugins:{legend:{display:false}},
-    elements:{point:{radius:2}}
-  });
-  if (hChart) hChart.destroy();
-  const hCtx = document.getElementById('hoursChart');
-  if (hCtx) hChart = new Chart(hCtx, {
-    type:'line',
-    data:{labels, datasets:[{data:hoursData, borderColor:'#42A5F5', backgroundColor:'rgba(66,165,245,.15)', fill:true, tension:.3}]},
-    options: opts('#42A5F5', 'Hours')
-  });
-  if (mChart) mChart.destroy();
-  const mCtx = document.getElementById('mcqChart');
-  if (mCtx) mChart = new Chart(mCtx, {
-    type:'line',
-    data:{labels, datasets:[{data:mcqData, borderColor:'#66BB6A', backgroundColor:'rgba(102,187,106,.15)', fill:true, tension:.3}]},
-    options: opts('#66BB6A', 'MCQs')
-  });
+  renderDailyLog(logs);
+  renderPhaseMatrix(logs);
+  renderMcqMatrix(logs);
+  renderDailyCharts(logs);
 }
 
-function renderLogTable() {
-  const logs = JSON.parse(localStorage.getItem(DAILY_KEY) || '[]');
-  const vm = currentViewDate.getMonth(), vy = currentViewDate.getFullYear();
-  const grouped = {};
-  logs.forEach(l => {
-    const parts = l.date.split('/');
-    if (parts.length !== 3) return;
-    if (parseInt(parts[1])-1 === vm && parseInt(parts[2]) === vy) {
-      if (!grouped[l.date]) grouped[l.date] = {h:0, m:0, subs:new Set(), cyc:0};
-      grouped[l.date].h += (l.duration||0)/60;
-      grouped[l.date].m += (l.mcqs||0);
-      grouped[l.date].subs.add(l.subject);
-      if (!l.skipped) grouped[l.date].cyc++;
-    }
-  });
+function renderDailyLog(logs) {
   const tbody = document.getElementById('dailyLogBody');
   if (!tbody) return;
-  const keys = Object.keys(grouped).reverse();
-  if (keys.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">No logs this month</td></tr>';
+  if (logs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">No sessions yet</td></tr>`;
     return;
   }
-  tbody.innerHTML = keys.map(d => {
-    const g = grouped[d];
-    return `<tr><td>${d}</td><td>${g.h.toFixed(1)}h</td><td>${g.cyc}</td><td>${g.m}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${Array.from(g.subs).join(', ')}</td></tr>`;
+  // Group by date
+  const byDate = {};
+  logs.forEach(l => {
+    if (!byDate[l.date]) byDate[l.date] = { hrs:0, cycles:0, mcqs:0, subjects:new Set() };
+    byDate[l.date].hrs += (l.duration||0)/60;
+    byDate[l.date].cycles++;
+    byDate[l.date].mcqs += l.mcqs||0;
+    byDate[l.date].subjects.add(l.subject);
+  });
+  tbody.innerHTML = Object.entries(byDate).slice(0,30).map(([date, d]) =>
+    `<tr>
+      <td style="color:var(--text2)">${date}</td>
+      <td style="color:var(--primary)">${d.hrs.toFixed(1)}</td>
+      <td style="color:var(--text2)">${d.cycles}</td>
+      <td style="color:var(--green)">${d.mcqs}</td>
+      <td style="color:var(--text3);font-size:9px">${[...d.subjects].join(', ')}</td>
+    </tr>`
+  ).join('');
+}
+
+function renderPhaseMatrix(logs) {
+  const tbody = document.getElementById('matrixBody');
+  if (!tbody) return;
+  const phases = ['First Reading','Second Reading','Third Reading','Extra Bonus'];
+  const matrix = {};
+  SUBJECTS_19.forEach(s => { matrix[s] = {0:0,1:0,2:0,3:0}; });
+  logs.forEach(l => {
+    const pi = phases.indexOf(l.phase);
+    if (pi < 0 || !matrix[l.subject]) return;
+    matrix[l.subject][pi]++;
+  });
+  tbody.innerHTML = SUBJECTS_19.map(s => {
+    const r = matrix[s];
+    const total = r[0]+r[1]+r[2]+r[3];
+    if (total === 0) return '';
+    return `<tr>
+      <td class="matrix-row-head">${s}</td>
+      <td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td>
+    </tr>`;
   }).join('');
 }
 
-function renderPhaseMatrix() {
-  const logs = JSON.parse(localStorage.getItem(DAILY_KEY) || '[]');
-  const phaseMap = {'First Reading':0,'Second Reading':1,'Third Reading':2,'Extra Bonus':3,'Bonus Reading':3};
-  const dMatrix = {}, mMatrix = {};
-  SUBJECTS_19.forEach(s => { dMatrix[s] = [new Set(), new Set(), new Set(), new Set()]; mMatrix[s] = [0,0,0,0]; });
+function renderMcqMatrix(logs) {
+  const tbody = document.getElementById('mcqMatrixBody');
+  if (!tbody) return;
+  const phases = ['First Reading','Second Reading','Third Reading','Extra Bonus'];
+  const matrix = {};
+  SUBJECTS_19.forEach(s => { matrix[s] = {0:0,1:0,2:0,3:0}; });
   logs.forEach(l => {
-    const s = l.subject, ph = l.phase || 'First Reading';
-    const idx = phaseMap[ph];
-    if (dMatrix[s] && idx !== undefined) {
-      dMatrix[s][idx].add(l.date);
-      mMatrix[s][idx] += (parseInt(l.mcqs)||0);
+    const pi = phases.indexOf(l.phase);
+    if (pi < 0 || !matrix[l.subject]) return;
+    matrix[l.subject][pi] += l.mcqs||0;
+  });
+  tbody.innerHTML = SUBJECTS_19.map(s => {
+    const r = matrix[s];
+    const total = r[0]+r[1]+r[2]+r[3];
+    if (total === 0) return '';
+    return `<tr>
+      <td class="matrix-row-head">${s}</td>
+      <td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderDailyCharts(logs) {
+  const vd = currentViewDate;
+  const yr = vd.getFullYear(), mo = vd.getMonth();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('monthDisplay').textContent = `${months[mo].toUpperCase()} ${yr}`;
+  const daysInMonth = new Date(yr, mo+1, 0).getDate();
+  const labels = Array.from({length:daysInMonth},(_,i)=>i+1);
+  const hrsData = new Array(daysInMonth).fill(0);
+  const mcqData = new Array(daysInMonth).fill(0);
+  (logs || JSON.parse(localStorage.getItem(DAILY_KEY)||'[]')).forEach(l => {
+    const parts = l.date.split('/');
+    if (!parts[2]) return;
+    const lm = parseInt(parts[1])-1, ld = parseInt(parts[0])-1, ly = parseInt(parts[2]);
+    if (ly === yr && lm === mo && ld >= 0 && ld < daysInMonth) {
+      hrsData[ld] += (l.duration||0)/60;
+      mcqData[ld] += l.mcqs||0;
     }
   });
-  const dTotals = [0,0,0,0], mTotals = [0,0,0,0];
-  let dHtml = '', mHtml = '';
-  SUBJECTS_19.forEach(s => {
-    const days = dMatrix[s].map(set => set.size);
-    const mcqs = mMatrix[s];
-    days.forEach((d,i) => dTotals[i] += d);
-    mcqs.forEach((m,i) => mTotals[i] += m);
-    dHtml += `<tr><td class="matrix-row-head">${s}</td>${days.map(d=>`<td>${d||'-'}</td>`).join('')}</tr>`;
-    mHtml += `<tr><td class="matrix-row-head">${s}</td>${mcqs.map(m=>`<td>${m||'-'}</td>`).join('')}</tr>`;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const textColor = isDark ? '#4A7A9B' : '#7BA7C8';
+  const chartOpts = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{color:textColor,font:{size:8},maxRotation:0},grid:{color:gridColor}},
+      y:{ticks:{color:textColor,font:{size:9}},grid:{color:gridColor},beginAtZero:true}
+    }
+  };
+  if (hChart) hChart.destroy();
+  if (mChart) mChart.destroy();
+  const hCtx = document.getElementById('hoursChart');
+  const mCtx = document.getElementById('mcqChart');
+  if (!hCtx || !mCtx) return;
+  hChart = new Chart(hCtx, {
+    type:'bar',
+    data:{labels,datasets:[{data:hrsData,backgroundColor:'rgba(66,165,245,0.6)',borderColor:'#42A5F5',borderWidth:1,borderRadius:3}]},
+    options: JSON.parse(JSON.stringify(chartOpts))
   });
-  dHtml += `<tr><td class="matrix-row-head matrix-total">TOTAL</td>${dTotals.map(t=>`<td class="matrix-total">${t}</td>`).join('')}</tr>`;
-  mHtml += `<tr><td class="matrix-row-head matrix-total">TOTAL</td>${mTotals.map(t=>`<td class="matrix-total">${t}</td>`).join('')}</tr>`;
-  const mb = document.getElementById('matrixBody');
-  const mmb = document.getElementById('mcqMatrixBody');
-  if (mb) mb.innerHTML = dHtml;
-  if (mmb) mmb.innerHTML = mHtml;
+  mChart = new Chart(mCtx, {
+    type:'bar',
+    data:{labels,datasets:[{data:mcqData,backgroundColor:'rgba(76,175,80,0.6)',borderColor:'#4CAF50',borderWidth:1,borderRadius:3}]},
+    options: JSON.parse(JSON.stringify(chartOpts))
+  });
+}
+
+function changeViewMonth(dir) {
+  currentViewDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + dir, 1);
+  renderDailyCharts();
 }
 
 // ── INSTALL ────────────────────────────────────────────────
-function triggerInstall() {
+async function triggerInstall() {
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then(r => {
-      if (r.outcome === 'accepted') showToast('✅ App installed!');
-      deferredInstallPrompt = null;
-    });
-  } else { showInstallModal(); }
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') { deferredInstallPrompt = null; document.getElementById('install-banner').style.display='none'; }
+  }
 }
-function showInstallModal() { document.getElementById('modal-install').classList.add('visible'); }
-function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+function showInstallModal() {
+  document.getElementById('modal-install').classList.add('visible');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('visible');
+}
 
 // ── TOAST ──────────────────────────────────────────────────
-let toastTimer;
+let toastTimeout;
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  SAMPLE QUESTIONS
-// ═══════════════════════════════════════════════════════════
+// ── SAMPLE QUESTIONS (fallback) ────────────────────────────
 const SAMPLE_QUESTIONS = [
-  {id:1,exam:"NEET PG",year:"2023",subject:"Anatomy",question:"Which nerve is responsible for innervating the diaphragm?",options:["Phrenic nerve","Vagus nerve","Intercostal nerves","Recurrent laryngeal nerve"],correct:0,explanation:"The phrenic nerve (C3, C4, C5) is the sole motor nerve to the diaphragm. Remember: C3, 4, 5 keeps the diaphragm alive!"},
-  {id:2,exam:"NEET PG",year:"2022",subject:"Physiology",question:"Normal glomerular filtration rate (GFR) in a healthy adult is approximately:",options:["50 ml/min","75 ml/min","125 ml/min","200 ml/min"],correct:2,explanation:"Normal GFR is approximately 125 ml/min (180 L/day). This is the volume of plasma filtered by glomeruli per minute."},
-  {id:3,exam:"INICET",year:"2023",subject:"Biochemistry",question:"Which enzyme is deficient in Phenylketonuria (PKU)?",options:["Tyrosinase","Phenylalanine hydroxylase","Homogentisate oxidase","Fumarylacetoacetase"],correct:1,explanation:"PKU is caused by deficiency of phenylalanine hydroxylase, leading to accumulation of phenylalanine and its toxic metabolites."},
-  {id:4,exam:"FMGE",year:"2022",subject:"Pharmacology",question:"Which antibiotic is contraindicated in children under 8 years due to teeth discoloration?",options:["Amoxicillin","Tetracycline","Erythromycin","Cephalexin"],correct:1,explanation:"Tetracyclines bind to calcium and are deposited in developing teeth and bones, causing permanent yellow-brown discoloration in children under 8."},
-  {id:5,exam:"UPSC CMS",year:"2023",subject:"Pathology",question:"Reed-Sternberg cells are pathognomonic of which condition?",options:["Non-Hodgkin lymphoma","Chronic lymphocytic leukemia","Hodgkin lymphoma","Multiple myeloma"],correct:2,explanation:"Reed-Sternberg cells (owl-eye cells) are large binucleated or multinucleated cells that are the hallmark of Hodgkin lymphoma."},
-  {id:6,exam:"NEET PG",year:"2023",subject:"Microbiology",question:"Which organism causes Weil's disease (severe leptospirosis)?",options:["Leptospira biflexa","Leptospira interrogans","Borrelia recurrentis","Treponema pallidum"],correct:1,explanation:"Weil's disease is caused by Leptospira interrogans, particularly serovar icterohaemorrhagiae, causing jaundice, renal failure, and hemorrhage."},
-  {id:7,exam:"INICET",year:"2022",subject:"Surgery",question:"McBurney's point is at the junction of:",options:["Medial 1/3 and lateral 2/3 of ASIS-umbilicus line","Medial 2/3 and lateral 1/3 of ASIS-umbilicus line","Centre of line joining both ASIS","Medial 1/3 of Poupart's ligament"],correct:0,explanation:"McBurney's point is at the junction of lateral 1/3 and medial 2/3 of the line joining the right ASIS to the umbilicus."},
-  {id:8,exam:"FMGE",year:"2023",subject:"Medicine",question:"HbA1c of 7% corresponds to average blood glucose of approximately:",options:["120 mg/dL","154 mg/dL","183 mg/dL","212 mg/dL"],correct:1,explanation:"HbA1c of 7% corresponds to average blood glucose of approximately 154 mg/dL. Formula: (HbA1c × 28.7) - 46.7."},
-  {id:9,exam:"NEET PG",year:"2022",subject:"Anatomy",question:"The Circle of Willis does NOT include:",options:["Anterior communicating artery","Posterior communicating artery","Middle cerebral artery","Basilar artery"],correct:3,explanation:"The basilar artery is NOT part of the Circle of Willis. It contributes via the posterior cerebral arteries, but lies outside the circle."},
-  {id:10,exam:"UPSC CMS",year:"2022",subject:"Preventive Medicine",question:"Incubation period of Rabies most commonly is:",options:["1-7 days","1-3 months","6-12 months","More than 1 year"],correct:1,explanation:"The incubation period of rabies is most commonly 1-3 months (range: 4 days to years). Depends on site of bite."},
-  {id:11,exam:"NEET PG",year:"2023",subject:"Pharmacology",question:"Drug of choice for status epilepticus is:",options:["Phenytoin IV","Lorazepam IV","Sodium valproate IV","Levetiracetam IV"],correct:1,explanation:"Lorazepam IV (0.1 mg/kg) is first-line for status epilepticus. Rapid onset and prolonged CNS effect compared to diazepam."},
-  {id:12,exam:"INICET",year:"2023",subject:"Obstetrics",question:"Bishop score of ≥8 indicates:",options:["Poor prognosis for induction","Good prognosis for induction","Emergency cesarean needed","Post-term pregnancy"],correct:1,explanation:"Bishop score ≥8 indicates a favorable/ripe cervix with induction success rate similar to spontaneous labor."},
-  {id:13,exam:"FMGE",year:"2022",subject:"Anatomy",question:"Structures passing through the superior orbital fissure include all EXCEPT:",options:["CN III","CN IV","CN V1","CN II"],correct:3,explanation:"CN II (optic nerve) passes through the optic canal, NOT the superior orbital fissure. CN III, IV, VI, and V1 all pass through SOF."},
-  {id:14,exam:"NEET PG",year:"2022",subject:"Pathology",question:"Which type of necrosis is seen in tuberculosis?",options:["Liquefactive necrosis","Coagulative necrosis","Caseous necrosis","Fat necrosis"],correct:2,explanation:"Caseous necrosis is characteristic of tuberculosis. It appears cheese-like and results from granuloma formation with central necrosis."},
-  {id:15,exam:"UPSC CMS",year:"2023",subject:"Medicine",question:"Trousseau's sign is positive in:",options:["Hypercalcemia","Hypocalcemia","Hyperkalemia","Hypokalemia"],correct:1,explanation:"Trousseau's sign (carpal spasm on inflation of BP cuff) is a sign of hypocalcemia/tetany."},
-  {id:16,exam:"NEET PG",year:"2023",subject:"Microbiology",question:"Koplik's spots are seen in:",options:["Scarlet fever","Measles","Rubella","Chickenpox"],correct:1,explanation:"Koplik's spots are bluish-white spots on buccal mucosa, pathognomonic of measles (rubeola), appearing 1-2 days before rash."},
-  {id:17,exam:"INICET",year:"2022",subject:"Pharmacology",question:"Which beta-blocker is cardioselective?",options:["Propranolol","Timolol","Metoprolol","Carvedilol"],correct:2,explanation:"Metoprolol is cardioselective (β1 selective). Others include atenolol, bisoprolol. Propranolol and timolol are non-selective."},
-  {id:18,exam:"FMGE",year:"2023",subject:"Biochemistry",question:"Rate-limiting step enzyme of cholesterol synthesis is:",options:["Squalene synthase","HMG-CoA reductase","Lanosterol synthase","HMG-CoA synthase"],correct:1,explanation:"HMG-CoA reductase is the rate-limiting enzyme of cholesterol synthesis, converting HMG-CoA to mevalonate. Statins inhibit this enzyme."},
-  {id:19,exam:"NEET PG",year:"2022",subject:"Surgery",question:"Most common site of carcinoma in the large intestine:",options:["Cecum","Ascending colon","Sigmoid colon and rectum","Transverse colon"],correct:2,explanation:"Sigmoid colon and rectum account for approximately 55-60% of all colorectal carcinomas."},
-  {id:20,exam:"UPSC CMS",year:"2022",subject:"Anatomy",question:"Adductor canal (Hunter's canal) contains all EXCEPT:",options:["Femoral artery","Femoral vein","Saphenous nerve","Obturator nerve"],correct:3,explanation:"The adductor canal contains femoral artery, femoral vein, saphenous nerve, and nerve to vastus medialis. Obturator nerve does NOT pass through it."},
-  {id:21,exam:"NEET PG",year:"2023",subject:"Medicine",question:"'Apple core' appearance on barium enema is seen in:",options:["Crohn's disease","Carcinoma colon","Ulcerative colitis","Amoebic colitis"],correct:1,explanation:"'Apple core' appearance on barium enema is characteristic of carcinoma of the colon due to encircling tumor causing annular stricture."},
-  {id:22,exam:"INICET",year:"2023",subject:"Physiology",question:"Pepsinogen secretion is stimulated by:",options:["Secretin","Somatostatin","Vagal stimulation","Gastric inhibitory peptide"],correct:2,explanation:"Pepsinogen is secreted by chief cells. Vagal stimulation (via ACh), gastrin, and secretin are stimulants."},
-  {id:23,exam:"FMGE",year:"2022",subject:"Pathology",question:"Psammoma bodies are seen in all EXCEPT:",options:["Papillary carcinoma thyroid","Meningioma","Serous cystadenocarcinoma ovary","Medullary carcinoma thyroid"],correct:3,explanation:"Psammoma bodies are seen in papillary thyroid carcinoma, meningioma, serous cystadenocarcinoma, and mesothelioma — NOT medullary thyroid carcinoma."},
-  {id:24,exam:"NEET PG",year:"2022",subject:"Pharmacology",question:"Mechanism of action of metformin:",options:["Stimulates insulin secretion","Activates AMPK pathway","Inhibits DPP-4","Blocks SGLT-2"],correct:1,explanation:"Metformin activates AMP-activated protein kinase (AMPK), which decreases hepatic gluconeogenesis and increases peripheral glucose uptake."},
-  {id:25,exam:"UPSC CMS",year:"2023",subject:"Microbiology",question:"Organism causing gas gangrene:",options:["Clostridium tetani","Clostridium perfringens","Clostridium botulinum","Clostridium difficile"],correct:1,explanation:"Gas gangrene is most commonly caused by Clostridium perfringens (welchii), which produces alpha toxin (lecithinase)."},
-  {id:26,exam:"NEET PG",year:"2023",subject:"Obstetrics",question:"Placenta previa is characterized by:",options:["Painful antepartum hemorrhage","Painless antepartum hemorrhage","Retroplacental clot","Fetal distress in first bleed"],correct:1,explanation:"Placenta previa presents with painless, bright red antepartum hemorrhage. The uterus is soft and non-tender."},
-  {id:27,exam:"INICET",year:"2022",subject:"Anatomy",question:"Nerve supply of the skin over the parotid gland:",options:["Facial nerve","Auriculotemporal nerve","Great auricular nerve","Lesser occipital nerve"],correct:2,explanation:"The skin over the parotid gland is supplied by the great auricular nerve (C2, C3)."},
-  {id:28,exam:"FMGE",year:"2023",subject:"Medicine",question:"Earliest sign of hypertensive retinopathy:",options:["Papilledema","AV nipping","Cotton wool spots","Arteriolar narrowing/silver wiring"],correct:3,explanation:"The earliest sign of hypertensive retinopathy is generalized arteriolar narrowing (increased light reflex/silver wiring). AV nipping appears later."},
-  {id:29,exam:"NEET PG",year:"2022",subject:"Biochemistry",question:"Enzyme deficient in G6PD deficiency is:",options:["Hexokinase","Glucose-6-phosphate dehydrogenase","Pyruvate kinase","Phosphoglucose isomerase"],correct:1,explanation:"G6PD deficiency leads to hemolytic anemia due to inability to maintain NADPH and reduced glutathione levels."},
-  {id:30,exam:"UPSC CMS",year:"2022",subject:"Preventive Medicine",question:"Herd immunity threshold for measles is approximately:",options:["40-50%","60-70%","83-94%","99%"],correct:2,explanation:"Measles has R0 of 12-18, requiring 83-94% immunity for herd protection."}
+  {exam:'NEET PG',year:'2023',subject:'Anatomy',question:'Which nerve is most commonly injured in a mid-shaft fracture of the humerus?',options:['Ulnar nerve','Median nerve','Radial nerve','Axillary nerve'],correct:2,explanation:'The radial nerve winds around the posterior aspect of the humerus in the spiral groove and is commonly injured in mid-shaft fractures.'},
+  {exam:'NEET PG',year:'2023',subject:'Physiology',question:'The normal resting membrane potential of a neuron is approximately:',options:['-90 mV','-70 mV','-55 mV','+30 mV'],correct:1,explanation:'The resting membrane potential of a typical neuron is approximately -70 mV, maintained by the Na+/K+ ATPase pump and selective ion permeability.'},
+  {exam:'INICET',year:'2022',subject:'Biochemistry',question:'Which enzyme is deficient in Phenylketonuria (PKU)?',options:['Tyrosinase','Phenylalanine hydroxylase','Homogentisate oxidase','Fumarylacetoacetase'],correct:1,explanation:'PKU is caused by deficiency of phenylalanine hydroxylase, which converts phenylalanine to tyrosine. This leads to accumulation of phenylalanine and its metabolites.'},
+  {exam:'NEET PG',year:'2022',subject:'Pathology',question:'Reed-Sternberg cells are characteristic of:',options:['Non-Hodgkin lymphoma','Hodgkin lymphoma','Burkitt lymphoma','CLL'],correct:1,explanation:'Reed-Sternberg cells are large binucleated or multinucleated cells with prominent owl-eye nucleoli, pathognomonic of Hodgkin lymphoma.'},
+  {exam:'FMGE',year:'2023',subject:'Pharmacology',question:'Which of the following is a selective COX-2 inhibitor?',options:['Aspirin','Ibuprofen','Celecoxib','Indomethacin'],correct:2,explanation:'Celecoxib is a selective COX-2 inhibitor. It spares COX-1, thus reducing GI side effects compared to non-selective NSAIDs.'},
+  {exam:'NEET PG',year:'2023',subject:'Microbiology',question:'Koplik spots are pathognomonic of:',options:['Rubella','Measles','Roseola','Chickenpox'],correct:1,explanation:'Koplik spots are small white spots on the buccal mucosa, appearing 2-3 days before the measles rash. They are pathognomonic of measles (Rubeola).'},
+  {exam:'INICET',year:'2022',subject:'Medicine',question:'The most common cause of chronic kidney disease worldwide is:',options:['Hypertension','Diabetes mellitus','Glomerulonephritis','Polycystic kidney disease'],correct:1,explanation:'Diabetes mellitus is the most common cause of CKD worldwide, accounting for approximately 40-50% of cases through diabetic nephropathy.'},
+  {exam:'NEET PG',year:'2022',subject:'Surgery',question:'Charcot\'s triad consists of:',options:['Fever, jaundice, right upper quadrant pain','Fever, rigors, hypotension','Pain, mass, melena','Fever, anaemia, splenomegaly'],correct:0,explanation:'Charcot\'s triad (fever, jaundice, right upper quadrant pain) is classic for acute cholangitis caused by biliary obstruction and infection.'},
+  {exam:'FMGE',year:'2022',subject:'OBG',question:'The most common cause of postpartum haemorrhage is:',options:['Retained placenta','Uterine atony','Birth canal lacerations','Coagulation disorders'],correct:1,explanation:'Uterine atony accounts for approximately 80% of postpartum haemorrhage cases. It occurs when the uterus fails to contract after delivery.'},
+  {exam:'NEET PG',year:'2023',subject:'Pediatrics',question:'The age of closure of the anterior fontanelle is:',options:['6 months','12 months','18 months','24 months'],correct:2,explanation:'The anterior fontanelle normally closes between 9-18 months of age, with 18 months being the standard upper limit of normal closure.'}
 ];
 </script>
 </body>

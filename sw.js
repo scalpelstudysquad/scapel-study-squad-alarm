@@ -1,16 +1,18 @@
 // ═══════════════════════════════════════════════════════════
-//  SSS ALARM — Service Worker v2.1
-//  Scalpel Study Squad
-//  Handles: caching, offline support, background sync,
-//           push notifications, alarm persistence
+//  SSS ALARM — Service Worker v3.0
+//  • Stores alarms in Cache API (survives SW restart)
+//  • Checks alarms every 30s while SW is alive
+//  • Shows high-priority screen-wake notification (requireInteraction)
+//  • Fires alarm in open app tabs via postMessage
+//  • Periodic Background Sync for extra Android reliability
+//  • Re-notifies every 20s if user swipes notification away
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME    = 'sss-alarm-v2.1';
-const STATIC_CACHE  = 'sss-static-v2.1';
-const DYNAMIC_CACHE = 'sss-dynamic-v2.1';
+const SW_VERSION    = '3.0';
+const STATIC_CACHE  = `sss-static-v${SW_VERSION}`;
+const DYNAMIC_CACHE = `sss-dynamic-v${SW_VERSION}`;
+const DATA_CACHE    = `sss-data-v${SW_VERSION}`;
 
-// ── FILES TO CACHE ON INSTALL ──────────────────────────────
-// List every file that must work offline
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -26,310 +28,381 @@ const STATIC_ASSETS = [
   './icons/icon-512.png'
 ];
 
-// ── EXTERNAL URLS TO CACHE (CDN assets) ───────────────────
-const CDN_ASSETS = [
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&display=swap'
-];
+// ── In-memory state ───────────────────────────────────────
+const firedThisSession = new Set(); // dedup fired alarms
+let   cachedAlarms     = [];
+let   activeAlarmIds   = new Set(); // alarms currently ringing
 
-// ── INSTALL ────────────────────────────────────────────────
-self.addEventListener('install', event => {
-  console.log('[SSS SW] Installing v2.1...');
+// ═══════════════════════════════════════════════════════════
+//  ALARM STORAGE  (Cache API → persists across SW restarts)
+// ═══════════════════════════════════════════════════════════
+
+async function loadAlarmsFromCache() {
+  try {
+    const cache = await caches.open(DATA_CACHE);
+    const res   = await cache.match('alarm-list');
+    if (!res) return [];
+    const data  = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch(e) { return []; }
+}
+
+async function saveAlarmsToCache(alarms) {
+  try {
+    const cache = await caches.open(DATA_CACHE);
+    await cache.put('alarm-list', new Response(JSON.stringify(alarms), {
+      headers: { 'Content-Type': 'application/json' }
+    }));
+    cachedAlarms = alarms;
+  } catch(e) {}
+}
+
+// Load alarms immediately when SW starts
+loadAlarmsFromCache().then(a => {
+  cachedAlarms = a;
+  console.log(`[SSS SW v${SW_VERSION}] Loaded ${a.length} alarm(s).`);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  CORE ALARM CHECK  — called every 30 seconds
+// ═══════════════════════════════════════════════════════════
+
+async function checkAlarms() {
+  const alarms = cachedAlarms.length ? cachedAlarms : await loadAlarmsFromCache();
+  if (!alarms.length) return;
+
+  const now = new Date();
+  const ct  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const cd  = now.getDay();
+
+  for (const alarm of alarms) {
+    if (!alarm.enabled) continue;
+    if (alarm.time !== ct) continue;
+    if (alarm.days && alarm.days.length > 0 && !alarm.days.includes(cd)) continue;
+
+    const dedupeKey = `${alarm.id}_${now.toDateString()}_${ct}`;
+    if (firedThisSession.has(dedupeKey)) continue;
+    firedThisSession.add(dedupeKey);
+
+    console.log(`[SSS SW] ⏰ Firing alarm: "${alarm.label}" at ${ct}`);
+    activeAlarmIds.add(alarm.id);
+
+    // Show persistent notification (works with screen off)
+    await showAlarmNotification(alarm);
+
+    // Tell open app tabs to start audio immediately
+    const openClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    openClients.forEach(client =>
+      client.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm })
+    );
+  }
+}
+
+// Run every 30 seconds
+setInterval(checkAlarms, 30000);
+checkAlarms();
+
+// ═══════════════════════════════════════════════════════════
+//  ALARM NOTIFICATION  — high priority, stays on screen
+// ═══════════════════════════════════════════════════════════
+
+async function showAlarmNotification(alarm) {
+  const qCount = alarm.qCount || 15;
+
+  // Aggressive vibration: 3 long pulses then 3 short, repeat feel
+  const vibratePattern = [
+    900,200, 900,200, 900,400,
+    300,200, 300,200, 300,500,
+    900,200, 900,200, 900
+  ];
+
+  try {
+    await self.registration.showNotification(`⏰ ${alarm.label}`, {
+      body:             `Alarm ringing! Tap → Answer ${qCount} MCQs → Alarm stops 🔔`,
+      icon:             './icons/icon-192.png',
+      badge:            './icons/icon-96.png',
+      vibrate:          vibratePattern,
+      tag:              `sss-alarm-${alarm.id}`,   // unique per alarm
+      renotify:         true,
+      requireInteraction: true,   // ← CRITICAL: stays on lock screen
+      silent:           false,    // use system notification sound
+      timestamp:        Date.now(),
+      actions: [
+        { action: 'open-quiz', title: '📝 Answer MCQs' },
+        { action: 'open-app',  title: '⏰ Open App'    }
+      ],
+      data: { alarm, firedAt: Date.now() }
+    });
+  } catch(e) {
+    // Fallback without actions (iOS Safari doesn't support actions)
+    try {
+      await self.registration.showNotification(`⏰ ${alarm.label}`, {
+        body:             `Alarm ringing! Tap to answer ${qCount} MCQs 🔔`,
+        icon:             './icons/icon-192.png',
+        vibrate:          vibratePattern,
+        tag:              `sss-alarm-${alarm.id}`,
+        renotify:         true,
+        requireInteraction: true,
+        silent:           false,
+        data:             { alarm }
+      });
+    } catch(e2) {
+      console.error('[SSS SW] Notification error:', e2);
+    }
+  }
+
+  // Re-vibrate every 20s until user opens app (max 3 min)
+  startReminderLoop(alarm);
+}
+
+// Re-notify if user ignores / swipes away notification
+function startReminderLoop(alarm) {
+  let attempts = 0;
+  const id = setInterval(async () => {
+    attempts++;
+    if (attempts > 9) { clearInterval(id); return; } // stop after 3 min
+
+    // If app opened and handled alarm, stop reminding
+    if (!activeAlarmIds.has(alarm.id)) { clearInterval(id); return; }
+
+    const openClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (openClients.length > 0) {
+      // App is open – it's handling things, but re-post message just in case
+      openClients.forEach(c => c.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm }));
+    } else {
+      // App closed – keep vibrating notification
+      try {
+        await self.registration.showNotification(`⏰ ALARM STILL RINGING — ${alarm.label}`, {
+          body:             `You haven't answered the MCQs yet! Open app to stop alarm.`,
+          icon:             './icons/icon-192.png',
+          badge:            './icons/icon-96.png',
+          vibrate:          [500,200,500,200,1000],
+          tag:              `sss-alarm-${alarm.id}`,
+          renotify:         true,
+          requireInteraction: true,
+          silent:           true,  // vibrate only, no repeated sound
+          data:             { alarm }
+        });
+      } catch(e) {}
+    }
+  }, 20000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NOTIFICATION CLICK  → open app and start alarm audio
+// ═══════════════════════════════════════════════════════════
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const alarm  = event.notification.data?.alarm;
+  const action = event.action || 'open-app';
+
   event.waitUntil(
-    Promise.all([
-      // Cache static local assets
-      caches.open(STATIC_CACHE).then(cache => {
-        return Promise.allSettled(
-          STATIC_ASSETS.map(url =>
-            cache.add(url).catch(err => {
-              console.warn('[SSS SW] Failed to cache:', url, err.message);
-            })
-          )
-        );
-      }),
-      // Cache CDN assets separately (may fail on first load — that's OK)
-      caches.open(DYNAMIC_CACHE).then(cache => {
-        return Promise.allSettled(
-          CDN_ASSETS.map(url =>
-            fetch(url, { mode: 'cors' })
-              .then(res => { if (res.ok) cache.put(url, res); })
-              .catch(() => {})
-          )
-        );
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        // Focus existing window
+        for (const client of clientList) {
+          if (client.url.includes('index.html') || /\/$/.test(client.url)) {
+            client.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm, action });
+            return client.focus();
+          }
+        }
+        // No window open — open app, then send message after it loads
+        return clients.openWindow('./index.html').then(newClient => {
+          if (newClient) {
+            // Give the page 2s to initialize
+            setTimeout(() => {
+              newClient.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm, action });
+            }, 2000);
+          }
+        });
       })
-    ]).then(() => {
-      console.log('[SSS SW] Install complete.');
-      // Activate immediately without waiting for old SW to be released
-      return self.skipWaiting();
-    })
   );
 });
 
-// ── ACTIVATE ───────────────────────────────────────────────
-self.addEventListener('activate', event => {
-  console.log('[SSS SW] Activating...');
+// ═══════════════════════════════════════════════════════════
+//  MESSAGE HANDLER  — from main app page
+// ═══════════════════════════════════════════════════════════
+
+self.addEventListener('message', event => {
+  const msg = event.data || {};
+
+  switch (msg.type) {
+
+    // Main page sends all alarms on startup and on every change
+    case 'UPDATE_ALARMS':
+      saveAlarmsToCache(msg.alarms || []);
+      console.log(`[SSS SW] Alarms updated: ${(msg.alarms||[]).length}`);
+      break;
+
+    // User answered all MCQs — alarm is done
+    case 'ALARM_DISMISSED':
+      activeAlarmIds.delete(msg.alarmId);
+      // Close all notifications for this alarm
+      self.registration.getNotifications({ tag: `sss-alarm-${msg.alarmId}` })
+        .then(notifs => notifs.forEach(n => n.close()))
+        .catch(() => {});
+      // Also close catch-all tag
+      self.registration.getNotifications({ tag: 'sss-alarm-active' })
+        .then(notifs => notifs.forEach(n => n.close()))
+        .catch(() => {});
+      console.log(`[SSS SW] Alarm dismissed: ${msg.alarmId}`);
+      break;
+
+    // Register periodic background sync
+    case 'REGISTER_PERIODIC_SYNC':
+      registerPeriodicSync();
+      break;
+
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+
+    default:
+      break;
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  PERIODIC BACKGROUND SYNC  — Chrome Android only
+//  Wakes SW ~every minute even when phone is idle
+// ═══════════════════════════════════════════════════════════
+
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'sss-alarm-check') {
+    console.log('[SSS SW] Periodic background sync triggered.');
+    event.waitUntil(checkAlarms());
+  }
+});
+
+async function registerPeriodicSync() {
+  try {
+    if (!self.registration.periodicSync) return;
+    const status = await navigator.permissions?.query({ name: 'periodic-background-sync' });
+    if (status?.state === 'granted') {
+      await self.registration.periodicSync.register('sss-alarm-check', {
+        minInterval: 60 * 1000 // 1 minute
+      });
+      console.log('[SSS SW] Periodic background sync registered ✓');
+    }
+  } catch(e) {
+    console.warn('[SSS SW] Periodic sync unavailable:', e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INSTALL
+// ═══════════════════════════════════════════════════════════
+
+self.addEventListener('install', event => {
+  console.log(`[SSS SW v${SW_VERSION}] Installing...`);
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys
-          .filter(key => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
-          .map(key => {
-            console.log('[SSS SW] Deleting old cache:', key);
-            return caches.delete(key);
-          })
-      );
-    }).then(() => {
-      console.log('[SSS SW] Activated. Claiming clients...');
-      return self.clients.claim();
-    })
+    caches.open(STATIC_CACHE)
+      .then(cache => Promise.allSettled(
+        STATIC_ASSETS.map(url => cache.add(url).catch(() => {}))
+      ))
+      .then(() => self.skipWaiting())
   );
 });
 
-// ── FETCH STRATEGY ─────────────────────────────────────────
-// Strategy:
-//   - HTML pages          → Network first, fallback to cache
-//   - Static assets       → Cache first, fallback to network
-//   - API / questions.json→ Network first, fallback to cache
-//   - CDN fonts/scripts   → Cache first, fallback to network
-//   - External images     → Network only (no cache for GitHub raw)
+// ═══════════════════════════════════════════════════════════
+//  ACTIVATE
+// ═══════════════════════════════════════════════════════════
+
+self.addEventListener('activate', event => {
+  console.log(`[SSS SW v${SW_VERSION}] Activating...`);
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(
+        keys
+          .filter(k => k !== STATIC_CACHE && k !== DYNAMIC_CACHE && k !== DATA_CACHE)
+          .map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+// ═══════════════════════════════════════════════════════════
+//  FETCH  — offline-first caching
+// ═══════════════════════════════════════════════════════════
+
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-
-  // Skip chrome-extension and non-http requests
   if (!event.request.url.startsWith('http')) return;
 
-  // ── GitHub raw content (icons) — network with cache fallback
+  const url = new URL(event.request.url);
+
+  // GitHub raw (icons) — network + cache
   if (url.hostname === 'raw.githubusercontent.com') {
     event.respondWith(
-      fetch(event.request)
-        .then(res => {
-          if (res && res.ok) {
-            const resClone = res.clone();
-            caches.open(DYNAMIC_CACHE).then(cache => cache.put(event.request, resClone));
-          }
+      fetch(event.request).then(res => {
+        if (res?.ok) caches.open(DYNAMIC_CACHE).then(c => c.put(event.request, res.clone()));
+        return res;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // CDN / Fonts — cache first
+  if (url.hostname.includes('fonts.') || url.hostname.includes('cdn.jsdelivr')) {
+    event.respondWith(
+      caches.match(event.request).then(cached => cached ||
+        fetch(event.request).then(res => {
+          if (res?.ok) caches.open(DYNAMIC_CACHE).then(c => c.put(event.request, res.clone()));
           return res;
         })
-        .catch(() => caches.match(event.request))
+      )
     );
     return;
   }
 
-  // ── Google Fonts & CDN — cache first
-  if (url.hostname.includes('fonts.googleapis.com') ||
-      url.hostname.includes('fonts.gstatic.com') ||
-      url.hostname.includes('cdn.jsdelivr.net')) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(res => {
-          if (res && res.ok) {
-            const resClone = res.clone();
-            caches.open(DYNAMIC_CACHE).then(cache => cache.put(event.request, resClone));
-          }
-          return res;
-        }).catch(() => cached);
-      })
-    );
-    return;
-  }
-
-  // ── questions.json — network first (fresh questions), fallback cache
+  // questions.json — network first (freshest data)
   if (url.pathname.endsWith('questions.json')) {
     event.respondWith(
-      fetch(event.request)
-        .then(res => {
-          if (res && res.ok) {
-            const resClone = res.clone();
-            caches.open(STATIC_CACHE).then(cache => cache.put(event.request, resClone));
-          }
-          return res;
-        })
-        .catch(() => caches.match(event.request))
+      fetch(event.request).then(res => {
+        if (res?.ok) caches.open(STATIC_CACHE).then(c => c.put(event.request, res.clone()));
+        return res;
+      }).catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // ── HTML (index.html / root) — network first for freshness
-  if (event.request.mode === 'navigate' ||
-      url.pathname.endsWith('.html') ||
-      url.pathname === '/') {
+  // HTML navigation — network first
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then(res => {
-          if (res && res.ok) {
-            const resClone = res.clone();
-            caches.open(STATIC_CACHE).then(cache => cache.put(event.request, resClone));
-          }
-          return res;
-        })
-        .catch(() =>
-          caches.match(event.request).then(cached =>
-            cached || caches.match('./index.html')
-          )
-        )
+      fetch(event.request).then(res => {
+        if (res?.ok) caches.open(STATIC_CACHE).then(c => c.put(event.request, res.clone()));
+        return res;
+      }).catch(() =>
+        caches.match(event.request).then(c => c || caches.match('./index.html'))
+      )
     );
     return;
   }
 
-  // ── Everything else — cache first, fallback network
+  // Everything else — cache first
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(res => {
-        if (res && res.ok && res.type !== 'opaque') {
-          const resClone = res.clone();
-          caches.open(DYNAMIC_CACHE).then(cache => cache.put(event.request, resClone));
+        if (res?.ok && res.type !== 'opaque') {
+          caches.open(DYNAMIC_CACHE).then(c => c.put(event.request, res.clone()));
         }
         return res;
-      }).catch(() => {
-        // Return a basic offline fallback for images
-        if (event.request.destination === 'image') {
-          return new Response(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#132B45"/><text x="50" y="55" text-anchor="middle" fill="#42A5F5" font-size="14" font-family="sans-serif">SSS</text></svg>',
-            { headers: { 'Content-Type': 'image/svg+xml' } }
-          );
-        }
-        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
-      });
+      }).catch(() =>
+        event.request.destination === 'image'
+          ? new Response(
+              '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">' +
+              '<rect width="96" height="96" rx="20" fill="#132B45"/>' +
+              '<text x="48" y="56" text-anchor="middle" fill="#42A5F5" ' +
+              'font-size="18" font-weight="bold" font-family="sans-serif">SSS</text></svg>',
+              { headers: { 'Content-Type': 'image/svg+xml' } }
+            )
+          : new Response('Offline', { status: 503 })
+      );
     })
   );
 });
 
-// ── PUSH NOTIFICATIONS ─────────────────────────────────────
-// Fired when a push message arrives from the server (optional future feature)
-self.addEventListener('push', event => {
-  let data = { title: '⏰ SSS ALARM', body: 'Time to study!', icon: './icons/icon-192.png' };
-  if (event.data) {
-    try { data = { ...data, ...event.data.json() }; } catch(e) {}
-  }
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body:    data.body,
-      icon:    data.icon || './icons/icon-192.png',
-      badge:   './icons/icon-96.png',
-      vibrate: [200, 100, 200, 100, 400],
-      tag:     'sss-alarm',
-      renotify: true,
-      requireInteraction: true,
-      actions: [
-        { action: 'start-quiz', title: '📝 Answer MCQs' },
-        { action: 'snooze',     title: '💤 Snooze 5 min' }
-      ],
-      data: data
-    })
-  );
-});
-
-// ── NOTIFICATION CLICK ─────────────────────────────────────
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-
-  const action = event.action;
-  const targetUrl = action === 'snooze'
-    ? './index.html?action=snooze'
-    : action === 'start-quiz'
-    ? './index.html?action=quiz'
-    : './index.html';
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      // If app window is already open, focus it
-      for (const client of clientList) {
-        if (client.url.includes('index.html') && 'focus' in client) {
-          client.postMessage({ type: 'NOTIFICATION_ACTION', action });
-          return client.focus();
-        }
-      }
-      // Otherwise open a new window
-      if (clients.openWindow) return clients.openWindow(targetUrl);
-    })
-  );
-});
-
-// ── NOTIFICATION DISMISS ───────────────────────────────────
-self.addEventListener('notificationclose', event => {
-  // User dismissed the notification — log it (optional analytics)
-  console.log('[SSS SW] Notification dismissed:', event.notification.tag);
-});
-
-// ── BACKGROUND SYNC ────────────────────────────────────────
-// Fires when connectivity is restored (for future server sync)
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-study-logs') {
-    event.waitUntil(syncStudyLogs());
-  }
-});
-
-async function syncStudyLogs() {
-  // Placeholder — implement server sync here if needed
-  console.log('[SSS SW] Background sync: study logs');
-}
-
-// ── PERIODIC BACKGROUND SYNC ───────────────────────────────
-// Wakes the SW periodically (Chrome Android, when granted)
-self.addEventListener('periodicsync', event => {
-  if (event.tag === 'alarm-check') {
-    event.waitUntil(checkScheduledAlarms());
-  }
-});
-
-async function checkScheduledAlarms() {
-  // Post a message to all open clients to check alarms
-  const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-  allClients.forEach(client => {
-    client.postMessage({ type: 'PERIODIC_ALARM_CHECK' });
-  });
-}
-
-// ── MESSAGE HANDLER ────────────────────────────────────────
-// Receives messages from the main page
-self.addEventListener('message', event => {
-  const { type, payload } = event.data || {};
-
-  if (type === 'SKIP_WAITING') {
-    self.skipWaiting();
-    return;
-  }
-
-  if (type === 'CACHE_QUESTION_BANK') {
-    // Pre-cache a custom questions.json blob sent from the page
-    caches.open(STATIC_CACHE).then(cache => {
-      const response = new Response(JSON.stringify(payload), {
-        headers: { 'Content-Type': 'application/json' }
-      });
-      cache.put('./questions.json', response);
-      console.log('[SSS SW] Questions cached from message.');
-    });
-    return;
-  }
-
-  if (type === 'SHOW_ALARM_NOTIFICATION') {
-    // Page asks SW to show an alarm notification (useful when tab is hidden)
-    const alarm = payload || {};
-    self.registration.showNotification('⏰ ' + (alarm.label || 'Study Alarm'), {
-      body:    `Answer ${alarm.qCount || 15} MCQs → Unlock alarm tone 🔔`,
-      icon:    './icons/icon-192.png',
-      badge:   './icons/icon-96.png',
-      vibrate: [300, 100, 300, 100, 600],
-      tag:     'sss-alarm-' + (alarm.id || 'main'),
-      renotify: true,
-      requireInteraction: true,
-      actions: [
-        { action: 'start-quiz', title: '📝 Answer MCQs' },
-        { action: 'snooze',     title: '💤 Snooze' }
-      ],
-      data: alarm
-    });
-    return;
-  }
-
-  // Unknown message — ignore
-  console.log('[SSS SW] Unknown message type:', type);
-});
-
-// ── VERSION LOG ────────────────────────────────────────────
-console.log('[SSS SW] Scalpel Study Squad Alarm — Service Worker v2.1 loaded.');
+console.log(`[SSS SW] Loaded v${SW_VERSION}`);
 

@@ -916,9 +916,20 @@ function pingSW(){
 function handleSWMessage(event){
   const msg = event.data || {};
 
+  // ── FIRE_ALARM_AUDIO: keepalive detected alarm (screen on) ──
+  // Shows alarm overlay → user taps button → quiz
   if(msg.type === 'FIRE_ALARM_AUDIO'){
-    // SW detected alarm time match and messaged us
     if(!activeAlarm) fireAlarm(msg.alarm);
+    return;
+  }
+
+  // ── LAUNCH_QUIZ: notification was tapped (screen off) ──────
+  // Skips alarm overlay entirely → starts audio → goes straight to quiz
+  // This is the "tap notification → answer questions" flow
+  if(msg.type === 'LAUNCH_QUIZ'){
+    if(!activeAlarm){
+      launchQuizFromNotification(msg.alarm);
+    }
     return;
   }
 
@@ -1187,7 +1198,40 @@ function fireAlarm(alarm){
 // ── START QUIZ ────────────────────────────────────────────
 function startQuiz(){
   document.getElementById('alarm-overlay').classList.remove('visible');
-  const alarm=activeAlarm;
+  _runQuiz(activeAlarm);
+}
+
+// ── LAUNCH QUIZ DIRECTLY from notification tap ────────────
+// Called when user taps the lock-screen notification.
+// Starts alarm audio + skips alarm overlay → goes straight to MCQs.
+function launchQuizFromNotification(alarm){
+  if(activeAlarm) return;
+  activeAlarm = alarm;
+  requestWakeLock();
+  startNoSleep();
+  lockNavigation();
+  startAlarmAudio(alarm);
+
+  // Vibrate
+  if('vibrate' in navigator){
+    navigator.vibrate([800,200,800,200,800]);
+    window._alarmVibrateInterval = setInterval(()=>{
+      if(activeAlarm) navigator.vibrate([500,200,500,200,1000]);
+    }, 5000);
+  }
+
+  // Tell SW alarm is active
+  if(navigator.serviceWorker?.controller){
+    navigator.serviceWorker.controller.postMessage({ type:'ALARM_DISMISSED', alarmId: alarm.id });
+    // Note: we send ALARM_DISMISSED immediately so SW closes the notification
+    // We still stop audio ourselves in dismissAlarmFinal()
+  }
+
+  // Go straight to quiz — no overlay shown
+  _runQuiz(alarm);
+}
+
+function _runQuiz(alarm){
   const total=alarm?(alarm.qCount||15):15;
   const examFilter=alarm?(alarm.exams||['ALL']):['ALL'];
   let pool=questions.length>0?questions:SAMPLE_QUESTIONS;

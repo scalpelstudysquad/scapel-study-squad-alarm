@@ -1,14 +1,15 @@
 // ═══════════════════════════════════════════════════════════
-//  SSS ALARM — Service Worker v3.1
+//  SSS ALARM — Service Worker v3.2
 //
-//  FIX v3.1:
-//  • REMOVED unreliable setInterval (SW is killed after ~30s idle)
-//  • Alarms checked on every KEEPALIVE ping from page (every 25s)
-//  • FIXED registerPeriodicSync (navigator not available in SW)
-//  • event.waitUntil() on every message keeps SW alive long enough
+//  v3.2 CHANGES:
+//  • Rich lock-screen notification: large logo image shown prominently
+//  • Rhythmic re-notify every 10s with pulsing vibration (like real alarm)
+//  • Tap notification → LAUNCHES QUIZ DIRECTLY (no intermediate screen)
+//  • Action button "📝 Start Quiz" goes straight to questions
+//  • KEEPALIVE architecture from v3.1 retained
 // ═══════════════════════════════════════════════════════════
 
-const SW_VERSION    = '3.1';
+const SW_VERSION    = '3.2';
 const STATIC_CACHE  = `sss-static-v${SW_VERSION}`;
 const DYNAMIC_CACHE = `sss-dynamic-v${SW_VERSION}`;
 const DATA_CACHE    = `sss-data-v${SW_VERSION}`;
@@ -100,100 +101,164 @@ async function checkAlarms() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  ALARM NOTIFICATION
+//  ALARM NOTIFICATION  — rich lock-screen card
+//
+//  • icon  = small badge (top-left on Android)
+//  • image = large logo shown prominently in expanded notification
+//  • Vibrates in a rhythmic pulse every 10s like a real alarm app
+//  • Tap or "📝 Start Quiz" → LAUNCHES QUIZ DIRECTLY in app
 // ═══════════════════════════════════════════════════════════
+
+const LOGO_URL = 'https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png';
+
+// Rhythmic pulse — 3 short beats then a rest, like a cardiac monitor
+const PULSE_VIBRATE = [
+  300,120, 300,120, 300,600,   // ♪ ♪ ♪  ...pause
+  300,120, 300,120, 300,600,   // ♪ ♪ ♪  ...pause
+  600,200, 600,800             // ♫ ♫    ...long rest
+];
 
 async function showAlarmNotification(alarm) {
   const qCount = alarm.qCount || 15;
-  const vibratePattern = [
-    900,200, 900,200, 900,400,
-    300,200, 300,200, 300,500,
-    900,200, 900,200, 900
-  ];
+  const label  = alarm.label  || 'SSS Alarm';
 
   const base = {
-    body:               `Alarm ringing! Tap → Answer ${qCount} MCQs → Alarm stops 🔔`,
-    icon:               './icons/icon-192.png',
-    badge:              './icons/icon-96.png',
-    vibrate:            vibratePattern,
-    tag:                `sss-alarm-${alarm.id}`,
-    renotify:           true,
-    requireInteraction: true,
-    silent:             false,
+    // ── Content ──────────────────────────────────────────
+    body:    `Tap to answer ${qCount} MCQs and stop the alarm 🔔`,
+
+    // ── Icons ────────────────────────────────────────────
+    // icon  → small circle icon (notification row, status bar)
+    // badge → monochrome icon shown in status bar on Android
+    // image → large image shown in expanded notification body ← KEY for "logo appears"
+    icon:    LOGO_URL,
+    badge:   LOGO_URL,
+    image:   LOGO_URL,
+
+    // ── Behaviour ────────────────────────────────────────
+    vibrate:            PULSE_VIBRATE,
+    tag:                `sss-alarm-${alarm.id}`,  // unique per alarm
+    renotify:           true,    // allows re-showing same tag (for rhythmic re-ring)
+    requireInteraction: true,    // stays on lock screen until tapped
+    silent:             false,   // play system notification sound
     timestamp:          Date.now(),
-    data:               { alarm, firedAt: Date.now() }
+    data:               { alarm, firedAt: Date.now(), directQuiz: true }
+  };
+
+  const withActions = {
+    ...base,
+    actions: [
+      { action: 'start-quiz', title: '📝 Start Quiz Now' },
+      { action: 'open-app',   title: '⏰ Open App'        }
+    ]
   };
 
   try {
-    await self.registration.showNotification(`⏰ ${alarm.label}`, {
-      ...base,
-      actions: [
-        { action: 'open-quiz', title: '📝 Answer MCQs' },
-        { action: 'open-app',  title: '⏰ Open App'    }
-      ]
-    });
+    await self.registration.showNotification(`⏰ ${label} — RINGING`, withActions);
   } catch(e) {
     try {
-      await self.registration.showNotification(`⏰ ${alarm.label}`, base);
+      // Fallback without actions (iOS Safari)
+      await self.registration.showNotification(`⏰ ${label} — RINGING`, base);
     } catch(e2) {
       console.error('[SSS SW] Notification error:', e2);
     }
   }
 
-  startReminderLoop(alarm);
+  // Start rhythmic re-notification loop
+  startRhythmicLoop(alarm);
 }
 
-function startReminderLoop(alarm) {
-  let attempts = 0;
+// ── Rhythmic loop: re-notifies every 10s so it keeps pulsing ──
+// Each re-notify replaces the existing notification (same tag)
+// but triggers vibrate again and updates the body text with elapsed time
+function startRhythmicLoop(alarm) {
+  let pulse   = 0;
+  const qCount = alarm.qCount || 15;
+  const label  = alarm.label  || 'SSS Alarm';
+
   const id = setInterval(async () => {
-    attempts++;
-    if (attempts > 9 || !activeAlarmIds.has(alarm.id)) {
+    pulse++;
+
+    // Stop after 18 min (108 pulses × 10s) or when dismissed
+    if (pulse > 108 || !activeAlarmIds.has(alarm.id)) {
       clearInterval(id);
       return;
     }
+
+    const elapsed = pulse * 10; // seconds
+    const elStr   = elapsed < 60
+      ? `${elapsed}s`
+      : `${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+
     const openClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+
     if (openClients.length > 0) {
+      // App is open — ping it so audio keeps playing / quiz launches
       openClients.forEach(c => c.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm }));
-    } else {
-      try {
-        await self.registration.showNotification(`⏰ ALARM STILL RINGING — ${alarm.label}`, {
-          body:               `You haven't answered the MCQs yet! Open app to stop alarm.`,
-          icon:               './icons/icon-192.png',
-          badge:              './icons/icon-96.png',
-          vibrate:            [500,200,500,200,1000,200,1000],
-          tag:                `sss-alarm-${alarm.id}`,
-          renotify:           true,
-          requireInteraction: true,
-          silent:             true,
-          data:               { alarm }
-        });
-      } catch(e) {}
     }
-  }, 20000);
+
+    // Always re-show notification so lock screen keeps pulsing
+    try {
+      await self.registration.showNotification(`⏰ ${label} — ${elStr} RINGING`, {
+        body:               `Tap to answer ${qCount} MCQs and stop the alarm 🔔`,
+        icon:               LOGO_URL,
+        badge:              LOGO_URL,
+        image:              LOGO_URL,
+        vibrate:            PULSE_VIBRATE,
+        tag:                `sss-alarm-${alarm.id}`,
+        renotify:           true,
+        requireInteraction: true,
+        silent:             true,   // vibrate only on re-rings (no repeated sound)
+        data:               { alarm, firedAt: Date.now(), directQuiz: true },
+        actions: [
+          { action: 'start-quiz', title: '📝 Start Quiz Now' },
+          { action: 'open-app',   title: '⏰ Open App'        }
+        ]
+      });
+    } catch(e) {}
+
+  }, 10000); // every 10 seconds
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NOTIFICATION CLICK
+//  NOTIFICATION CLICK  → open app and LAUNCH QUIZ DIRECTLY
+//
+//  Tapping the notification (or "Start Quiz" button) skips
+//  the alarm overlay entirely and goes straight to MCQs.
+//  Audio starts simultaneously on the page side.
 // ═══════════════════════════════════════════════════════════
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const alarm = event.notification.data?.alarm;
+  const alarm  = event.notification.data?.alarm;
+  const action = event.action; // 'start-quiz' | 'open-app' | '' (body tap)
+
+  // Body tap OR "Start Quiz" → go directly to quiz
+  // "Open App" → show alarm overlay (normal flow)
+  const goDirectToQuiz = (action === 'start-quiz' || action === '');
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then(clientList => {
+        // Find an existing open window
         for (const client of clientList) {
           if (client.url.includes('index.html') || /\/$/.test(client.url)) {
-            client.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm });
+            client.postMessage({
+              type:  goDirectToQuiz ? 'LAUNCH_QUIZ' : 'FIRE_ALARM_AUDIO',
+              alarm
+            });
             return client.focus();
           }
         }
+
+        // No window open — open app fresh, then send message after 2.5s init
         return clients.openWindow('./index.html').then(newClient => {
           if (newClient) {
             setTimeout(() => {
-              newClient.postMessage({ type: 'FIRE_ALARM_AUDIO', alarm });
-            }, 2000);
+              newClient.postMessage({
+                type:  goDirectToQuiz ? 'LAUNCH_QUIZ' : 'FIRE_ALARM_AUDIO',
+                alarm
+              });
+            }, 2500);
           }
         });
       })

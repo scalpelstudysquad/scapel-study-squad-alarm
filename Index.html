@@ -6,10 +6,12 @@
 <meta name="theme-color" content="#0B1A2A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Scalpel Alarm">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
-<title>Scalpel Study Squad Alarm</title>
+<!-- FIX 3: Correct short name for iOS home screen -->
+<meta name="apple-mobile-web-app-title" content="SSS ALARM">
+<!-- FIX 4: Direct apple-touch-icon from GitHub -->
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png">
+<link rel="manifest" id="manifest-link" href="manifest.json">
+<title>SSS ALARM — Scalpel Study Squad</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -99,6 +101,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);user
   text-transform:uppercase;
   line-height:1.25;
 }
+/* ── FIX 3: HEADER BUTTONS ROW ───────────────────────────── */
+.header-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .theme-btn{
   width:36px;height:36px;border-radius:50%;
   background:var(--surface);border:1px solid var(--border);
@@ -107,6 +111,22 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);user
   transition:all .15s;
 }
 .theme-btn:active{transform:scale(.88)}
+/* Small PWA install button in header */
+.pwa-install-btn{
+  display:none; /* shown via JS when installable */
+  align-items:center;gap:5px;
+  padding:7px 11px;
+  background:var(--pgrad);
+  border:none;border-radius:20px;
+  font-family:'Nunito',sans-serif;
+  font-size:11px;font-weight:800;
+  color:white;cursor:pointer;
+  white-space:nowrap;
+  box-shadow:0 2px 10px var(--psoft);
+  transition:all .15s;
+}
+.pwa-install-btn:active{transform:scale(.92)}
+.pwa-install-btn.show{display:flex}
 
 /* ── EXAM TRACKER ────────────────────────────────────────── */
 .exam-tracker{
@@ -425,6 +445,19 @@ input[type="range"]::-webkit-slider-thumb{
   border-radius:20px;font-size:11px;font-weight:800;
   color:var(--primary);margin-bottom:24px;
 }
+/* FIX 1: Hint that alarm plays AFTER questions */
+.alarm-sound-hint{
+  font-size:11px;color:var(--text3);
+  margin-bottom:12px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.alarm-sound-hint-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px var(--green);
+  animation:blink 1.2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .alarm-quote{
   font-size:13px;color:var(--text3);
   font-style:italic;margin-bottom:30px;
@@ -478,9 +511,7 @@ input[type="range"]::-webkit-slider-thumb{
 .quiz-question-text{font-size:15px;font-weight:700;line-height:1.55;margin-bottom:14px;color:var(--text)}
 
 /* ── QUIZ QUESTION IMAGE ─────────────────────────── */
-.quiz-img-wrap{
-  text-align:center;margin:0 0 16px;
-}
+.quiz-img-wrap{text-align:center;margin:0 0 16px;}
 .quiz-img{
   max-width:100%;border-radius:10px;
   border:1px solid var(--border);
@@ -489,9 +520,7 @@ input[type="range"]::-webkit-slider-thumb{
 }
 
 /* ── EXPLANATION IMAGE ───────────────────────────── */
-.exp-img-wrap{
-  text-align:center;margin:10px 0 0;
-}
+.exp-img-wrap{text-align:center;margin:10px 0 0;}
 .exp-img{
   max-width:100%;border-radius:8px;
   border:1px solid var(--border);
@@ -563,6 +592,16 @@ input[type="range"]::-webkit-slider-thumb{
 .results-emoji{font-size:60px;margin-bottom:14px;display:block}
 .results-title{font-size:26px;font-weight:900;color:var(--text);margin-bottom:6px}
 .results-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5}
+/* FIX 1: Alarm ringing indicator on results screen */
+.alarm-ringing-badge{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:8px 16px;margin:0 auto 16px;
+  background:rgba(66,165,245,.15);border:1px solid var(--primary);
+  border-radius:20px;width:fit-content;
+  font-size:12px;font-weight:800;color:var(--primary);
+  animation:ringPulse 0.8s ease-in-out infinite;
+}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(66,165,245,.4)}50%{box-shadow:0 0 0 8px rgba(66,165,245,0)}}
 .score-circle{
   width:100px;height:100px;border-radius:50%;
   background:var(--pgrad);padding:4px;margin:0 auto 20px;
@@ -745,12 +784,15 @@ input[type="range"]::-webkit-slider-thumb{
 .settings-value{font-size:11px;color:var(--text3);margin-top:1px}
 .settings-arrow{color:var(--text3);font-size:14px}
 
+/* FIX 3: Prominent install banner */
 .install-banner{
   margin:10px 14px 0;padding:14px;
   background:var(--psoft);border:1px solid var(--primary);
   border-radius:var(--radius);
-  display:flex;align-items:center;gap:10px;
+  display:none; /* shown via JS */
+  align-items:center;gap:10px;
 }
+.install-banner.visible{display:flex}
 .install-text{flex:1}
 .install-title{font-size:13px;font-weight:800;color:var(--text)}
 .install-sub{font-size:10px;color:var(--text2);margin-top:2px;line-height:1.4}
@@ -761,19 +803,6 @@ input[type="range"]::-webkit-slider-thumb{
   border:none;font-family:'Nunito',sans-serif;transition:transform .15s;
 }
 .install-btn:active{transform:scale(.94)}
-
-/* ── BOTTOM NAV (for settings) ───────────────────────────── */
-#bottom-nav{
-  width:100%;max-width:480px;
-  height:calc(var(--nav-h) + var(--safe-bottom));
-  padding-bottom:var(--safe-bottom);
-  background:var(--nav-bg);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--border);
-  display:none;
-  align-items:flex-start;padding-top:5px;
-  flex-shrink:0;z-index:20;
-}
 
 /* ── TOAST ───────────────────────────────────────────────── */
 #toast{
@@ -814,10 +843,18 @@ input[type="range"]::-webkit-slider-thumb{
   <div class="sticky-top">
     <div class="app-header">
       <div class="header-brand">
-        <img class="app-logo-img" src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="Scalpel">
-        <div class="app-title">Scalpel Study Squad Alarm</div>
+        <img class="app-logo-img"
+          src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png"
+          alt="SSS">
+        <div class="app-title">Scalpel Study Squad<br>Alarm</div>
       </div>
-      <div class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌗</div>
+      <!-- FIX 3: Header buttons row with small PWA install button -->
+      <div class="header-btns">
+        <button class="pwa-install-btn" id="header-install-btn" onclick="triggerInstall()" title="Install App">
+          📲 Install
+        </button>
+        <div class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌗</div>
+      </div>
     </div>
 
     <div class="exam-tracker" id="exam-tracker">
@@ -842,7 +879,6 @@ input[type="range"]::-webkit-slider-thumb{
       <div id="clock-display">12:00 AM</div>
       <div id="date-display">Loading...</div>
     </div>
-
     <div class="section-label">MY ALARMS</div>
     <div id="alarm-list" class="alarm-list"></div>
   </div>
@@ -850,7 +886,6 @@ input[type="range"]::-webkit-slider-thumb{
   <!-- ── DAILY TAB ──────────────────────────────────── -->
   <div id="content-daily" class="scroll-area">
 
-    <!-- Study Timer -->
     <div class="card">
       <div class="card-title">📚 Study Timer</div>
       <div class="row-2" style="margin-bottom:8px">
@@ -878,24 +913,13 @@ input[type="range"]::-webkit-slider-thumb{
         </div>
       </div>
       <div class="row-3" style="margin-bottom:4px">
-        <div class="input-block">
-          <label class="input-label">Hours</label>
-          <input type="number" class="d-input" id="studyHrs" value="2" min="0" max="12">
-        </div>
-        <div class="input-block">
-          <label class="input-label">Mins</label>
-          <input type="number" class="d-input" id="studyMins" value="0" min="0" max="59">
-        </div>
-        <div class="input-block">
-          <label class="input-label">Break</label>
-          <input type="number" class="d-input" id="breakMins" value="15" min="0" max="60">
-        </div>
+        <div class="input-block"><label class="input-label">Hours</label><input type="number" class="d-input" id="studyHrs" value="2" min="0" max="12"></div>
+        <div class="input-block"><label class="input-label">Mins</label><input type="number" class="d-input" id="studyMins" value="0" min="0" max="59"></div>
+        <div class="input-block"><label class="input-label">Break</label><input type="number" class="d-input" id="breakMins" value="15" min="0" max="60"></div>
       </div>
       <div id="timer-phase-badge" class="timer-phase-badge"></div>
       <div id="timer-display">00:00:00</div>
-      <div id="timer-btns-start">
-        <button class="t-btn t-btn-start" onclick="startStudyTimer()">▶ Start Session</button>
-      </div>
+      <div id="timer-btns-start"><button class="t-btn t-btn-start" onclick="startStudyTimer()">▶ Start Session</button></div>
       <div id="timer-btns-running" style="display:none">
         <div class="timer-btns">
           <button class="t-btn t-btn-pause" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
@@ -905,7 +929,6 @@ input[type="range"]::-webkit-slider-thumb{
       </div>
     </div>
 
-    <!-- Charts -->
     <div class="card">
       <div class="month-nav">
         <button class="month-nav-btn" onclick="changeViewMonth(-1)">◀</button>
@@ -918,26 +941,16 @@ input[type="range"]::-webkit-slider-thumb{
       <div class="chart-wrap"><canvas id="mcqChart"></canvas></div>
     </div>
 
-    <!-- Daily Log Table -->
     <div class="card">
       <div class="card-title">📋 Daily Log</div>
       <div style="overflow-x:auto">
         <table class="log-table">
-          <thead>
-            <tr>
-              <th style="width:22%">Date</th>
-              <th style="width:13%">Hrs</th>
-              <th style="width:11%">Cyc</th>
-              <th style="width:14%">MCQ</th>
-              <th>Subjects</th>
-            </tr>
-          </thead>
+          <thead><tr><th style="width:22%">Date</th><th style="width:13%">Hrs</th><th style="width:11%">Cyc</th><th style="width:14%">MCQ</th><th>Subjects</th></tr></thead>
           <tbody id="dailyLogBody"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- Phase Matrix - Days -->
     <div class="card">
       <div class="card-title">📅 Phase Matrix — Days Spent</div>
       <div style="overflow-x:auto">
@@ -948,7 +961,6 @@ input[type="range"]::-webkit-slider-thumb{
       </div>
     </div>
 
-    <!-- Phase Matrix - MCQs -->
     <div class="card" style="margin-bottom:20px">
       <div class="card-title">📊 Phase Matrix — MCQs Solved</div>
       <div style="overflow-x:auto">
@@ -962,11 +974,13 @@ input[type="range"]::-webkit-slider-thumb{
 
   <!-- ── SETTINGS / MORE TAB ───────────────────────── -->
   <div id="content-settings" class="scroll-area">
-    <div class="install-banner" id="install-banner" style="display:none">
+
+    <!-- FIX 3: Prominent install banner in settings -->
+    <div class="install-banner" id="install-banner">
       <div style="font-size:26px">📲</div>
       <div class="install-text">
-        <div class="install-title">Install as App</div>
-        <div class="install-sub">Add to home screen for best alarm experience</div>
+        <div class="install-title">Install SSS ALARM</div>
+        <div class="install-sub">Add to home screen for best alarm experience. App name: SSS ALARM</div>
       </div>
       <button class="install-btn" onclick="triggerInstall()">Install</button>
     </div>
@@ -978,7 +992,7 @@ input[type="range"]::-webkit-slider-thumb{
         <span class="settings-icon">📲</span>
         <div class="settings-info">
           <div class="settings-name">PWA Install Guide</div>
-          <div class="settings-value">Step-by-step installation</div>
+          <div class="settings-value">Step-by-step installation → Home screen as "SSS ALARM"</div>
         </div>
         <span class="settings-arrow">›</span>
       </div>
@@ -997,24 +1011,18 @@ input[type="range"]::-webkit-slider-thumb{
         <span class="settings-icon">🧪</span>
         <div class="settings-info">
           <div class="settings-name">Test Alarm Now</div>
-          <div class="settings-value">Fire a test alarm right now</div>
+          <div class="settings-value">Fire a test alarm — tone plays after answering MCQs</div>
         </div>
         <span class="settings-arrow">›</span>
       </div>
       <div class="settings-row" onclick="clearAllAlarms()">
         <span class="settings-icon">🗑️</span>
-        <div class="settings-info">
-          <div class="settings-name">Clear All Alarms</div>
-          <div class="settings-value">Delete all scheduled alarms</div>
-        </div>
+        <div class="settings-info"><div class="settings-name">Clear All Alarms</div><div class="settings-value">Delete all scheduled alarms</div></div>
         <span class="settings-arrow">›</span>
       </div>
       <div class="settings-row" onclick="clearDailyLogs()">
         <span class="settings-icon">🗑️</span>
-        <div class="settings-info">
-          <div class="settings-name">Clear Daily Logs</div>
-          <div class="settings-value">Delete all study session records</div>
-        </div>
+        <div class="settings-info"><div class="settings-name">Clear Daily Logs</div><div class="settings-value">Delete all study session records</div></div>
         <span class="settings-arrow">›</span>
       </div>
     </div>
@@ -1023,8 +1031,8 @@ input[type="range"]::-webkit-slider-thumb{
       <div class="settings-row">
         <span class="settings-icon">ℹ️</span>
         <div class="settings-info">
-          <div class="settings-name">Scalpel Study Squad Alarm</div>
-          <div class="settings-value">Version 2.0 • Material UI</div>
+          <div class="settings-name">SSS ALARM — Scalpel Study Squad</div>
+          <div class="settings-value">Version 2.1 • Alarm rings after MCQs ✅</div>
         </div>
       </div>
       <div class="settings-row">
@@ -1092,7 +1100,7 @@ input[type="range"]::-webkit-slider-thumb{
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Alarm Sound</label>
+      <label class="form-label">Alarm Sound — plays after completing MCQs 🔔</label>
       <div class="ringtone-list" id="ringtone-list">
         <div class="ringtone-item selected" data-sound="beep">
           <div class="ringtone-dot"></div>
@@ -1132,19 +1140,25 @@ input[type="range"]::-webkit-slider-thumb{
 </div>
 
 <!-- ── ALARM FIRING OVERLAY ──────────────────────── -->
+<!-- FIX 1: No audio here — alarm fires silently, tone plays after all MCQs answered -->
 <div id="alarm-overlay">
   <div class="alarm-overlay-content">
     <div class="alarm-icon-ring">
       <div class="alarm-icon-inner">
-        <img src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="Scalpel">
+        <img src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png" alt="SSS">
       </div>
     </div>
     <div class="alarm-now-time" id="alarm-now-time">06:00 AM</div>
     <div class="alarm-title-label" id="alarm-title-label">Wake Up!</div>
     <div class="alarm-exam-badge" id="alarm-exam-label">NEET PG</div>
+    <!-- Visual hint that alarm rings AFTER questions -->
+    <div class="alarm-sound-hint">
+      <div class="alarm-sound-hint-dot"></div>
+      <span>🔔 Alarm tone plays after you finish all MCQs</span>
+    </div>
     <div class="alarm-quote" id="alarm-motivational">"Medicine is not only a science; it is also an art."</div>
     <div class="alarm-btns">
-      <button class="btn-dismiss" onclick="startQuiz()">📝 Dismiss — Answer <span id="alarm-q-count">15</span> MCQs</button>
+      <button class="btn-dismiss" onclick="startQuiz()">📝 Start <span id="alarm-q-count">15</span> MCQs → Unlock Alarm 🔔</button>
       <button class="btn-snooze" onclick="snoozeAlarm()">💤 Snooze 5 minutes</button>
     </div>
     <div class="snooze-count" id="snooze-count-text">Snoozes used: 0/3</div>
@@ -1167,11 +1181,16 @@ input[type="range"]::-webkit-slider-thumb{
 </div>
 
 <!-- ── RESULTS OVERLAY ───────────────────────────── -->
+<!-- FIX 1: Alarm tone plays here, after all MCQs answered -->
 <div id="results-overlay">
   <div class="results-content">
     <span class="results-emoji" id="results-emoji">🎉</span>
     <div class="results-title" id="results-title">Alarm Dismissed!</div>
     <div class="results-sub" id="results-sub">You answered 15 questions. Rise and grind!</div>
+    <!-- Alarm ringing indicator -->
+    <div class="alarm-ringing-badge" id="alarm-ringing-badge" style="display:none">
+      🔔 Alarm Ringing — Good Morning!
+    </div>
     <div class="score-circle"><div class="score-inner">
       <div class="score-num" id="final-score">12</div>
       <div class="score-denom">/ <span id="final-total">15</span></div>
@@ -1181,7 +1200,7 @@ input[type="range"]::-webkit-slider-thumb{
       <div class="stat-box stat-wrong"><div class="stat-num" id="stat-wrong">3</div><div class="stat-label">Wrong</div></div>
       <div class="stat-box"><div class="stat-num" id="stat-pct" style="color:var(--primary)">80%</div><div class="stat-label">Score</div></div>
     </div>
-    <button class="btn-dismiss-final" onclick="dismissAlarmFinal()">✅ Start My Day</button>
+    <button class="btn-dismiss-final" onclick="dismissAlarmFinal()">✅ Stop Alarm & Start My Day</button>
   </div>
 </div>
 
@@ -1212,21 +1231,39 @@ input[type="range"]::-webkit-slider-thumb{
 <div class="modal-backdrop" id="modal-install" onclick="closeModal('modal-install')">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
-    <div class="modal-title">📲 Install Scalpel Alarm</div>
+    <div class="modal-title">📲 Install SSS ALARM</div>
     <div>
+      <!-- FIX 4: Icon preview -->
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--psoft);border-radius:10px;margin-bottom:14px">
+        <img src="https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png"
+          style="width:48px;height:48px;border-radius:12px;border:2px solid var(--primary)" alt="icon">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--text)">SSS ALARM</div>
+          <div style="font-size:11px;color:var(--text3)">Scalpel Study Squad</div>
+        </div>
+      </div>
+
       <div style="font-size:12px;font-weight:800;color:var(--primary);margin-bottom:4px">Android Chrome</div>
       <div class="install-step"><div class="step-num">1</div><div class="step-text">Open in <strong>Chrome</strong> on Android</div></div>
-      <div class="install-step"><div class="step-num">2</div><div class="step-text">Tap <strong>⋮ menu</strong> (three dots)</div></div>
-      <div class="install-step"><div class="step-num">3</div><div class="step-text">Tap <strong>"Add to Home screen"</strong></div></div>
-      <div class="install-step"><div class="step-num">4</div><div class="step-text">Tap <strong>Install</strong> in the dialog</div></div>
+      <div class="install-step"><div class="step-num">2</div><div class="step-text">Tap the <strong>⋮ menu</strong> (three dots, top right)</div></div>
+      <div class="install-step"><div class="step-num">3</div><div class="step-text">Tap <strong>"Add to Home screen"</strong> or <strong>"Install App"</strong></div></div>
+      <div class="install-step"><div class="step-num">4</div><div class="step-text">Tap <strong>Install</strong> — icon name will show as <strong>"SSS ALARM"</strong></div></div>
+
       <div style="font-size:12px;font-weight:800;color:var(--primary);margin:12px 0 4px">iPhone Safari</div>
-      <div class="install-step"><div class="step-num">1</div><div class="step-text">Open in <strong>Safari</strong> on iPhone</div></div>
-      <div class="install-step"><div class="step-num">2</div><div class="step-text">Tap the <strong>Share icon</strong> (⬆️)</div></div>
-      <div class="install-step"><div class="step-num">3</div><div class="step-text">Tap <strong>"Add to Home Screen"</strong></div></div>
-      <div style="background:rgba(255,167,38,.1);border:1px solid rgba(255,167,38,.3);border-radius:10px;padding:10px;margin-top:8px">
-        <div style="font-size:11px;font-weight:800;color:#FFA726;margin-bottom:3px">⚠️ Important</div>
-        <div style="font-size:11px;color:var(--text2);line-height:1.5">Keep the app open or device charging for reliable alarms. On iOS, keep app in foreground for audio.</div>
+      <div class="install-step"><div class="step-num">1</div><div class="step-text">Open in <strong>Safari</strong> on iPhone (not Chrome)</div></div>
+      <div class="install-step"><div class="step-num">2</div><div class="step-text">Tap the <strong>Share icon ⬆️</strong> (bottom center)</div></div>
+      <div class="install-step"><div class="step-num">3</div><div class="step-text">Scroll down → Tap <strong>"Add to Home Screen"</strong></div></div>
+      <div class="install-step"><div class="step-num">4</div><div class="step-text">Name it <strong>SSS ALARM</strong> → Tap <strong>Add</strong></div></div>
+
+      <div style="background:rgba(255,167,38,.1);border:1px solid rgba(255,167,38,.3);border-radius:10px;padding:10px;margin-top:10px">
+        <div style="font-size:11px;font-weight:800;color:#FFA726;margin-bottom:3px">⚠️ For Reliable Alarms</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6">Keep the installed app open and screen on while sleeping. On iOS, alarm fires only while app is open. Keep device charging overnight.</div>
       </div>
+
+      <!-- FIX 3: Install button inside modal too -->
+      <button id="modal-install-btn" class="btn-primary" style="margin-top:14px" onclick="triggerInstall()" >
+        📲 Install Now (Android Chrome)
+      </button>
     </div>
   </div>
 </div>
@@ -1235,8 +1272,39 @@ input[type="range"]::-webkit-slider-thumb{
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  SCALPEL STUDY SQUAD ALARM v2.0
+//  SSS ALARM — Scalpel Study Squad v2.1
+//  FIX 1: Alarm tone plays ONLY after all MCQs answered
+//  FIX 2: PWA name "SSS ALARM", inline manifest
+//  FIX 3: Small install button in header + settings
+//  FIX 4: Correct icon references
 // ═══════════════════════════════════════════════════════════
+
+// ── FIX 2 & 4: INJECT INLINE MANIFEST with correct name & icon ──
+(function injectManifest() {
+  const ICON_URL = 'https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png';
+  const manifest = {
+    name: 'Scalpel Study Squad Alarm',
+    short_name: 'SSS ALARM',
+    description: 'Alarm that makes you answer MCQs before ringing — for NEET PG, INICET, FMGE, UPSC CMS aspirants',
+    start_url: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0B1A2A',
+    theme_color: '#0B1A2A',
+    icons: [
+      { src: ICON_URL, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: ICON_URL, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  };
+  try {
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.getElementById('manifest-link') || document.querySelector('link[rel="manifest"]');
+    if (link) link.href = url;
+  } catch(e) {
+    // fallback: manifest.json must exist as a file on the server
+  }
+})();
 
 // ── THEME ──────────────────────────────────────────────────
 function toggleTheme() {
@@ -1254,9 +1322,9 @@ let currentMainTab = 'alarm';
 function switchMain(tab) {
   currentMainTab = tab;
   document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('mtab-'+tab).classList.add('active');
+  document.getElementById('mtab-' + tab).classList.add('active');
   document.querySelectorAll('.scroll-area').forEach(s => s.classList.remove('active'));
-  document.getElementById('content-'+tab).classList.add('active');
+  document.getElementById('content-' + tab).classList.add('active');
   document.getElementById('fab').style.display = tab === 'alarm' ? 'flex' : 'none';
   if (tab === 'daily') renderDailyUI();
 }
@@ -1274,13 +1342,13 @@ const EXAM_DATES = {
 function updateExamTracker() {
   const now = new Date();
   Object.keys(EXAM_DATES).forEach(key => {
-    const numEl = document.getElementById('edays-'+key);
-    const cardEl = document.getElementById('ecard-'+key);
+    const numEl  = document.getElementById('edays-' + key);
+    const cardEl = document.getElementById('ecard-' + key);
     if (!numEl) return;
     if (!EXAM_DATES[key]) { numEl.textContent = 'TBA'; return; }
     const diff = Math.ceil((EXAM_DATES[key] - now) / 86400000);
-    if (diff < 0) { numEl.textContent = 'DONE'; cardEl.classList.add('done'); }
-    else if (diff === 0) { numEl.textContent = 'TODAY'; cardEl.classList.add('done'); }
+    if (diff < 0)       { numEl.textContent = 'DONE';  cardEl.classList.add('done'); }
+    else if (diff === 0){ numEl.textContent = 'TODAY'; cardEl.classList.add('done'); }
     else {
       numEl.textContent = diff;
       if (diff <= 30) cardEl.classList.add('soon');
@@ -1356,10 +1424,28 @@ window.addEventListener('load', async () => {
   renderDailyUI();
 });
 
+// FIX 3: Show install button when PWA is installable
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  document.getElementById('install-banner').style.display = 'flex';
+  // Show header install button
+  const headerBtn = document.getElementById('header-install-btn');
+  if (headerBtn) headerBtn.classList.add('show');
+  // Show settings install banner
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.classList.add('visible');
+  // Show modal install button
+  const modalBtn = document.getElementById('modal-install-btn');
+  if (modalBtn) modalBtn.style.display = 'block';
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  const headerBtn = document.getElementById('header-install-btn');
+  if (headerBtn) headerBtn.classList.remove('show');
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.classList.remove('visible');
+  showToast('🎉 SSS ALARM installed! Check your home screen.');
 });
 
 document.addEventListener('touchstart', unlockAudio, { once: true });
@@ -1376,19 +1462,15 @@ function setupVolSlider() {
 }
 
 // ── CLOCK (12-hour) ────────────────────────────────────────
-function initClock() {
-  updateClock();
-  setInterval(updateClock, 1000);
-}
-
+function initClock() { updateClock(); setInterval(updateClock, 1000); }
 function updateClock() {
-  const now = new Date();
-  const h24 = now.getHours();
-  const m = String(now.getMinutes()).padStart(2,'0');
+  const now  = new Date();
+  const h24  = now.getHours();
+  const m    = String(now.getMinutes()).padStart(2,'0');
   const ampm = h24 >= 12 ? 'PM' : 'AM';
-  const h12 = h24 % 12 || 12;
+  const h12  = h24 % 12 || 12;
   document.getElementById('clock-display').textContent = `${String(h12).padStart(2,'0')}:${m} ${ampm}`;
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('date-display').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
 }
@@ -1396,23 +1478,21 @@ function updateClock() {
 // ── TIME PICKER ────────────────────────────────────────────
 function openTimePicker() {
   const input = document.getElementById('time-input');
-  input.showPicker ? input.showPicker() : input.click();
+  if (input.showPicker) input.showPicker(); else input.click();
 }
-
 function syncTimeDisplay() {
   const val = document.getElementById('time-input').value;
   if (!val) return;
   const [h24, m] = val.split(':').map(Number);
   const ampm = h24 >= 12 ? 'PM' : 'AM';
-  const h12 = h24 % 12 || 12;
+  const h12  = h24 % 12 || 12;
   document.getElementById('time-display').textContent = `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
   document.getElementById('time-ampm-label').textContent = ampm;
 }
-
 function formatTime12(time24) {
   const [h, m] = time24.split(':').map(Number);
   const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h % 12 || 12;
+  const h12  = h % 12 || 12;
   return `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
 }
 
@@ -1424,10 +1504,7 @@ function openAddDrawer() {
   document.getElementById('time-display').textContent = '06:00';
   document.getElementById('time-ampm-label').textContent = 'AM';
   document.getElementById('alarm-label-input').value = '';
-  selectedExams = ['ALL'];
-  selectedDays = [1,2,3,4,5];
-  selectedQCount = 15;
-  selectedSound = 'beep';
+  selectedExams = ['ALL']; selectedDays = [1,2,3,4,5]; selectedQCount = 15; selectedSound = 'beep';
   refreshChips('exam-chips', 'data-val', ['ALL']);
   refreshChips2('day-chips', 'data-day', [1,2,3,4,5]);
   refreshChips('q-count-chips', 'data-val', ['15']);
@@ -1438,7 +1515,6 @@ function openAddDrawer() {
   document.getElementById('sheet-backdrop').classList.add('visible');
   document.getElementById('add-alarm-sheet').classList.add('visible');
 }
-
 function closeAddDrawer() {
   document.getElementById('sheet-backdrop').classList.remove('visible');
   document.getElementById('add-alarm-sheet').classList.remove('visible');
@@ -1448,37 +1524,31 @@ function closeAddDrawer() {
 document.querySelectorAll('#exam-chips .chip').forEach(chip => {
   chip.addEventListener('click', () => {
     const val = chip.getAttribute('data-val');
-    if (val === 'ALL') {
-      selectedExams = ['ALL'];
-    } else {
+    if (val === 'ALL') { selectedExams = ['ALL']; }
+    else {
       selectedExams = selectedExams.filter(e => e !== 'ALL');
       const idx = selectedExams.indexOf(val);
-      if (idx > -1) selectedExams.splice(idx,1);
-      else selectedExams.push(val);
+      if (idx > -1) selectedExams.splice(idx,1); else selectedExams.push(val);
       if (selectedExams.length === 0) selectedExams = ['ALL'];
     }
     refreshChips('exam-chips', 'data-val', selectedExams);
   });
 });
-
 document.querySelectorAll('#day-chips .chip').forEach(chip => {
   chip.addEventListener('click', () => {
     const day = parseInt(chip.getAttribute('data-day'));
     const idx = selectedDays.indexOf(day);
-    if (idx > -1) selectedDays.splice(idx,1);
-    else selectedDays.push(day);
+    if (idx > -1) selectedDays.splice(idx,1); else selectedDays.push(day);
     if (selectedDays.length === 0) selectedDays = [0,1,2,3,4,5,6];
     refreshChips2('day-chips', 'data-day', selectedDays);
   });
 });
-
 document.querySelectorAll('#q-count-chips .chip').forEach(chip => {
   chip.addEventListener('click', () => {
     selectedQCount = parseInt(chip.getAttribute('data-val'));
     refreshChips('q-count-chips', 'data-val', [chip.getAttribute('data-val')]);
   });
 });
-
 document.querySelectorAll('#ringtone-list .ringtone-item').forEach(item => {
   item.addEventListener('click', () => {
     if (item.dataset.sound === 'custom') return;
@@ -1486,7 +1556,6 @@ document.querySelectorAll('#ringtone-list .ringtone-item').forEach(item => {
     updateRingtoneSel(selectedSound);
   });
 });
-
 function refreshChips(parentId, attr, values) {
   document.querySelectorAll(`#${parentId} .chip`).forEach(c => {
     c.classList.toggle('selected', values.includes(c.getAttribute(attr)));
@@ -1507,9 +1576,9 @@ function updateRingtoneSel(sound) {
 function saveAlarm() {
   const time = document.getElementById('time-input').value;
   if (!time) { showToast('⚠️ Please select a time'); return; }
-  const label = document.getElementById('alarm-label-input').value.trim() || 'Study Session';
+  const label  = document.getElementById('alarm-label-input').value.trim() || 'Study Session';
   const volume = parseInt(document.getElementById('volume-slider').value) / 100;
-  const sound = selectedSound;
+  const sound  = selectedSound;
 
   if (editingAlarmId) {
     const alarm = alarms.find(a => a.id === editingAlarmId);
@@ -1531,40 +1600,25 @@ function saveAlarm() {
     });
     showToast('⏰ Alarm set for ' + formatTime12(time));
   }
-
-  persistAlarms();
-  renderAlarms();
-  closeAddDrawer();
+  persistAlarms(); renderAlarms(); closeAddDrawer();
 }
-
 function persistAlarms() {
   const toSave = alarms.map(a => ({ ...a, customAudio: null }));
   localStorage.setItem('scalpel_alarms', JSON.stringify(toSave));
 }
-
 function toggleAlarm(id) {
   const alarm = alarms.find(a => a.id === id);
-  if (alarm) {
-    alarm.enabled = !alarm.enabled;
-    persistAlarms(); renderAlarms();
-    showToast(alarm.enabled ? '✅ Alarm enabled' : '🔕 Alarm disabled');
-  }
+  if (alarm) { alarm.enabled = !alarm.enabled; persistAlarms(); renderAlarms(); showToast(alarm.enabled ? '✅ Alarm enabled' : '🔕 Alarm disabled'); }
 }
-
 function deleteAlarm(id) {
-  alarms = alarms.filter(a => a.id !== id);
-  persistAlarms(); renderAlarms();
-  showToast('🗑️ Alarm deleted');
+  alarms = alarms.filter(a => a.id !== id); persistAlarms(); renderAlarms(); showToast('🗑️ Alarm deleted');
 }
-
 function editAlarm(id) {
-  const alarm = alarms.find(a => a.id === id);
-  if (!alarm) return;
+  const alarm = alarms.find(a => a.id === id); if (!alarm) return;
   editingAlarmId = id;
   document.getElementById('add-sheet-title').textContent = 'Edit Alarm';
   const [h24, m] = alarm.time.split(':').map(Number);
-  const ampm = h24 >= 12 ? 'PM' : 'AM';
-  const h12 = h24 % 12 || 12;
+  const ampm = h24 >= 12 ? 'PM' : 'AM'; const h12 = h24 % 12 || 12;
   document.getElementById('time-input').value = alarm.time;
   document.getElementById('time-display').textContent = `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
   document.getElementById('time-ampm-label').textContent = ampm;
@@ -1572,10 +1626,8 @@ function editAlarm(id) {
   document.getElementById('volume-slider').value = Math.round(alarm.volume * 100);
   document.getElementById('vol-display').textContent = Math.round(alarm.volume * 100);
   document.getElementById('volume-slider').style.setProperty('--val', Math.round(alarm.volume * 100) + '%');
-  selectedExams = alarm.exams || ['ALL'];
-  selectedDays = alarm.days || [1,2,3,4,5];
-  selectedQCount = alarm.qCount || 15;
-  selectedSound = alarm.sound || 'beep';
+  selectedExams = alarm.exams || ['ALL']; selectedDays = alarm.days || [1,2,3,4,5];
+  selectedQCount = alarm.qCount || 15; selectedSound = alarm.sound || 'beep';
   refreshChips('exam-chips', 'data-val', selectedExams);
   refreshChips2('day-chips', 'data-day', selectedDays);
   refreshChips('q-count-chips', 'data-val', [selectedQCount.toString()]);
@@ -1583,12 +1635,10 @@ function editAlarm(id) {
   document.getElementById('sheet-backdrop').classList.add('visible');
   document.getElementById('add-alarm-sheet').classList.add('visible');
 }
-
 function clearAllAlarms() {
   if (alarms.length === 0) { showToast('No alarms to clear'); return; }
   if (confirm('Delete all ' + alarms.length + ' alarm(s)?')) {
-    alarms = []; persistAlarms(); renderAlarms();
-    showToast('🗑️ All alarms cleared');
+    alarms = []; persistAlarms(); renderAlarms(); showToast('🗑️ All alarms cleared');
   }
 }
 
@@ -1599,14 +1649,13 @@ function renderAlarms() {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-icon">⏰</div>
       <div class="empty-title">No Alarms Set</div>
-      <div class="empty-sub">Tap + to set your first study alarm.<br>Answer MCQs to dismiss it!</div>
-    </div>`;
-    return;
+      <div class="empty-sub">Tap + to set your first study alarm.<br>🔔 Tone rings <em>after</em> you answer MCQs!</div>
+    </div>`; return;
   }
   const sorted = [...alarms].sort((a,b) => a.time.localeCompare(b.time));
   list.innerHTML = '';
   sorted.forEach(alarm => {
-    const daysStr = getDaysStr(alarm.days);
+    const daysStr  = getDaysStr(alarm.days);
     const examsStr = (alarm.exams || ['ALL']).join(', ');
     const card = document.createElement('div');
     card.className = `alarm-card ${alarm.enabled ? 'active-alarm' : 'inactive-alarm'}`;
@@ -1617,7 +1666,7 @@ function renderAlarms() {
         <div class="alarm-meta">
           <span class="alarm-badge exam-badge">${escHtml(examsStr)}</span>
           <span class="alarm-badge days-badge">${daysStr}</span>
-          <span class="alarm-badge">${alarm.qCount || 15} MCQs</span>
+          <span class="alarm-badge">${alarm.qCount || 15} MCQs → 🔔</span>
         </div>
       </div>
       <div class="alarm-actions">
@@ -1629,14 +1678,12 @@ function renderAlarms() {
     list.appendChild(card);
   });
 }
-
 function getDaysStr(days) {
   if (!days || days.length === 7) return 'Every Day';
   if (JSON.stringify([...days].sort((a,b)=>a-b)) === '[1,2,3,4,5]') return 'Weekdays';
   if (JSON.stringify([...days].sort((a,b)=>a-b)) === '[0,6]') return 'Weekends';
   return days.map(d => ['Su','Mo','Tu','We','Th','Fr','Sa'][d]).join(' ');
 }
-
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -1647,12 +1694,11 @@ function startAlarmChecker() {
   alarmCheckInterval = setInterval(checkAlarms, 15000);
   checkAlarms();
 }
-
 function checkAlarms() {
   if (activeAlarm) return;
   const now = new Date();
-  const ct = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const cd = now.getDay();
+  const ct  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const cd  = now.getDay();
   for (const alarm of alarms) {
     if (!alarm.enabled) continue;
     if (alarm.time !== ct) continue;
@@ -1660,33 +1706,31 @@ function checkAlarms() {
     const key = `fired_${alarm.id}_${now.toDateString()}_${ct}`;
     if (localStorage.getItem(key)) continue;
     localStorage.setItem(key, '1');
-    fireAlarm(alarm);
-    break;
+    fireAlarm(alarm); break;
   }
 }
 
+// ── FIX 1: fireAlarm — NO audio here; tone plays after MCQs ──
 function fireAlarm(alarm) {
-  activeAlarm = alarm;
-  snoozeCount = 0;
+  activeAlarm = alarm; snoozeCount = 0;
   requestWakeLock();
-  document.getElementById('alarm-now-time').textContent = formatTime12(alarm.time);
+  document.getElementById('alarm-now-time').textContent   = formatTime12(alarm.time);
   document.getElementById('alarm-title-label').textContent = alarm.label;
-  document.getElementById('alarm-exam-label').textContent = (alarm.exams || ['ALL']).join(' · ');
-  document.getElementById('alarm-q-count').textContent = alarm.qCount || 15;
+  document.getElementById('alarm-exam-label').textContent  = (alarm.exams || ['ALL']).join(' · ');
+  document.getElementById('alarm-q-count').textContent     = alarm.qCount || 15;
   document.getElementById('alarm-motivational').textContent = `"${QUOTES[Math.floor(Math.random() * QUOTES.length)]}"`;
-  document.getElementById('snooze-count-text').textContent = 'Snoozes used: 0/3';
+  document.getElementById('snooze-count-text').textContent  = 'Snoozes used: 0/3';
   document.getElementById('alarm-overlay').classList.add('visible');
-  startAlarmAudio(alarm);
+  // NOTE: NO startAlarmAudio() here — tone plays after all MCQs answered
   sendNotification(alarm);
 }
 
 function snoozeAlarm() {
   if (snoozeCount >= 3) { showToast('❌ No more snoozes! Answer the MCQs.'); return; }
   snoozeCount++;
-  stopAlarmAudio(); releaseWakeLock();
+  releaseWakeLock();
   document.getElementById('alarm-overlay').classList.remove('visible');
-  document.getElementById('snooze-count-text').textContent = `Snoozes used: ${snoozeCount}/3`;
-  showToast(`💤 Snoozed ${3-snoozeCount} left`);
+  showToast(`💤 Snoozed — ${3-snoozeCount} snooze(s) left`);
   const alarm = activeAlarm; activeAlarm = null;
   setTimeout(() => { if (alarm) fireAlarm(alarm); }, 5 * 60 * 1000);
 }
@@ -1694,8 +1738,10 @@ function snoozeAlarm() {
 function testAlarmNow() {
   const n = new Date();
   const testAlarm = {
-    id:'test', time:`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`,
-    label:'Test Alarm', sound: selectedSound || 'beep', volume: 0.8,
+    id: 'test',
+    time: `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`,
+    label: 'Test Alarm — complete MCQs to hear tone',
+    sound: selectedSound || 'beep', volume: 0.8,
     qCount: 5, exams: ['NEET PG'], days: [0,1,2,3,4,5,6], enabled: true
   };
   fireAlarm(testAlarm);
@@ -1703,9 +1749,7 @@ function testAlarmNow() {
 
 // ── WAKE LOCK ──────────────────────────────────────────────
 async function requestWakeLock() {
-  if ('wakeLock' in navigator) {
-    try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
-  }
+  if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
 }
 function releaseWakeLock() {
   if (wakeLock) { wakeLock.release(); wakeLock = null; }
@@ -1722,16 +1766,16 @@ function getAudioCtx() {
 }
 function startAlarmAudio(alarm) {
   stopAlarmAudio();
-  const vol = alarm.volume || 0.8;
-  if (alarm.sound === 'custom' && alarm.customAudio) { playCustomAudio(alarm.customAudio, vol); }
-  else { playBuiltinAlarm(alarm.sound || 'beep', vol); }
+  const vol = alarm ? (alarm.volume || 0.8) : 0.8;
+  if (alarm && alarm.sound === 'custom' && alarm.customAudio) playCustomAudio(alarm.customAudio, vol);
+  else playBuiltinAlarm((alarm && alarm.sound) || 'beep', vol);
 }
 function playBuiltinAlarm(type, vol) {
   const ctx = getAudioCtx();
   const gain = ctx.createGain(); gain.gain.value = vol; gain.connect(ctx.destination);
   alarmNodes = [gain];
-  if (type === 'beep') scheduleBeepPattern(ctx, gain);
-  else if (type === 'siren') scheduleSiren(ctx, gain);
+  if (type === 'beep')   scheduleBeepPattern(ctx, gain);
+  else if (type === 'siren')  scheduleSiren(ctx, gain);
   else if (type === 'buzzer') scheduleBuzzer(ctx, gain);
 }
 function scheduleBeepPattern(ctx, gain) {
@@ -1741,15 +1785,13 @@ function scheduleBeepPattern(ctx, gain) {
     [880,988,1108,0,880,988,1108,0,0].forEach((freq,i) => {
       if (!freq) return;
       const o = ctx.createOscillator(), g2 = ctx.createGain();
-      o.connect(g2); g2.connect(gain);
-      o.frequency.value = freq; o.type = 'sine';
+      o.connect(g2); g2.connect(gain); o.frequency.value = freq; o.type = 'sine';
       g2.gain.setValueAtTime(0.8, t+i*0.18);
       g2.gain.exponentialRampToValueAtTime(0.001, t+i*0.18+0.15);
       o.start(t+i*0.18); o.stop(t+i*0.18+0.15);
     });
     t += 9*0.18+0.5; setTimeout(loop, (9*0.18+0.5)*1000);
-  };
-  loop();
+  }; loop();
 }
 function scheduleSiren(ctx, gain) {
   const loop = () => {
@@ -1757,9 +1799,9 @@ function scheduleSiren(ctx, gain) {
     const o = ctx.createOscillator(), g2 = ctx.createGain();
     o.connect(g2); g2.connect(gain); o.type = 'sawtooth';
     const now = ctx.currentTime;
-    o.frequency.setValueAtTime(400, now); o.frequency.linearRampToValueAtTime(1200, now+1.2);
-    o.frequency.linearRampToValueAtTime(400, now+2.4); g2.gain.setValueAtTime(0.7, now);
-    o.start(now); o.stop(now+2.5); setTimeout(loop, 2500);
+    o.frequency.setValueAtTime(400,now); o.frequency.linearRampToValueAtTime(1200,now+1.2);
+    o.frequency.linearRampToValueAtTime(400,now+2.4); g2.gain.setValueAtTime(0.7,now);
+    o.start(now); o.stop(now+2.5); setTimeout(loop,2500);
   }; loop();
 }
 function scheduleBuzzer(ctx, gain) {
@@ -1771,13 +1813,13 @@ function scheduleBuzzer(ctx, gain) {
     g2.gain.setValueAtTime(0.9,now); g2.gain.setValueAtTime(0,now+0.5);
     g2.gain.setValueAtTime(0.9,now+0.6); g2.gain.setValueAtTime(0,now+1.1);
     g2.gain.setValueAtTime(0.9,now+1.2); g2.gain.setValueAtTime(0,now+1.7);
-    o.start(now); o.stop(now+2); setTimeout(loop, 2000);
+    o.start(now); o.stop(now+2); setTimeout(loop,2000);
   }; loop();
 }
 function playCustomAudio(dataUrl, vol) {
   const audio = new Audio(dataUrl); audio.loop = true; audio.volume = vol;
   audio.play().catch(console.error);
-  alarmNodes.push({ isAudio: true, element: audio });
+  alarmNodes.push({ isAudio:true, element:audio });
 }
 function stopAlarmAudio() {
   alarmNodes.forEach(n => {
@@ -1790,8 +1832,8 @@ function previewSound(type, e) {
   e.stopPropagation(); unlockAudio(); stopAlarmAudio();
   const gain = getAudioCtx().createGain(); gain.gain.value = 0.5;
   gain.connect(getAudioCtx().destination); alarmNodes = [gain];
-  if (type === 'beep') scheduleBeepPattern(getAudioCtx(), gain);
-  else if (type === 'siren') scheduleSiren(getAudioCtx(), gain);
+  if (type === 'beep')   scheduleBeepPattern(getAudioCtx(), gain);
+  else if (type === 'siren')  scheduleSiren(getAudioCtx(), gain);
   else if (type === 'buzzer') scheduleBuzzer(getAudioCtx(), gain);
   setTimeout(() => stopAlarmAudio(), 4000);
 }
@@ -1810,25 +1852,23 @@ function handleMusicUpload(event) {
 
 // ── NOTIFICATIONS ──────────────────────────────────────────
 function requestNotificationPermission() {
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
 }
 function sendNotification(alarm) {
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('⏰ ' + alarm.label, {
-      body: `Time: ${formatTime12(alarm.time)} — Answer ${alarm.qCount||15} MCQs to dismiss!`,
-      icon: 'icons/icon-192.png'
+    new Notification('📝 ' + alarm.label, {
+      body: `Answer ${alarm.qCount||15} MCQs → Alarm tone unlocks 🔔`,
+      icon: 'https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png'
     });
   }
 }
 
 // ── QUIZ ───────────────────────────────────────────────────
 function startQuiz() {
-  stopAlarmAudio();
+  // FIX 1: No stopAlarmAudio() needed — audio was never started
   document.getElementById('alarm-overlay').classList.remove('visible');
-  const alarm = activeAlarm;
-  const total = alarm ? (alarm.qCount || 15) : 15;
+  const alarm      = activeAlarm;
+  const total      = alarm ? (alarm.qCount || 15) : 15;
   const examFilter = alarm ? (alarm.exams || ['ALL']) : ['ALL'];
   let pool = questions.length > 0 ? questions : SAMPLE_QUESTIONS;
   if (!examFilter.includes('ALL')) {
@@ -1843,27 +1883,23 @@ function startQuiz() {
   renderQuestion();
 }
 
-// ── FIX 1: renderQuestion now uses question_images array ───
 function renderQuestion() {
   const q = quizQueue[currentQIdx], total = quizQueue.length;
   document.getElementById('q-current').textContent = currentQIdx + 1;
-  document.getElementById('quiz-progress-fill').style.width = (currentQIdx/total*100).toFixed(1) + '%';
+  document.getElementById('quiz-progress-fill').style.width = (currentQIdx/total*100).toFixed(1)+'%';
   const btn = document.getElementById('btn-next');
   btn.classList.remove('active');
-  btn.textContent = currentQIdx === total-1 ? 'See Results 🎯' : 'Next →';
-  const body = document.getElementById('quiz-body');
+  btn.textContent = currentQIdx === total-1 ? 'Finish & Unlock Alarm 🔔' : 'Next →';
+  const body    = document.getElementById('quiz-body');
   const letters = ['A','B','C','D','E'];
-
-  // Support both question_images array (new JSON) and legacy q.image field
-  const qImgs = q.question_images || (q.image ? [q.image] : []);
+  const qImgs   = q.question_images || (q.image ? [q.image] : []);
   const qImgHtml = qImgs.length
     ? qImgs.map(src => `<div class="quiz-img-wrap"><img src="${src}" class="quiz-img" onerror="this.parentElement.style.display='none'" alt="Question image"></div>`).join('')
     : '';
-
   body.innerHTML = `
     <div class="quiz-meta">
-      ${q.exam ? `<span class="quiz-meta-badge badge-exam">${escHtml(q.exam)}</span>` : ''}
-      ${q.year ? `<span class="quiz-meta-badge badge-year">${escHtml(String(q.year))}</span>` : ''}
+      ${q.exam    ? `<span class="quiz-meta-badge badge-exam">${escHtml(q.exam)}</span>` : ''}
+      ${q.year    ? `<span class="quiz-meta-badge badge-year">${escHtml(String(q.year))}</span>` : ''}
       ${q.subject ? `<span class="quiz-meta-badge badge-subject">${escHtml(q.subject)}</span>` : ''}
     </div>
     <div class="quiz-question-text">${escHtml(q.question)}</div>
@@ -1872,7 +1908,7 @@ function renderQuestion() {
       ${(q.options||[]).map((opt,i) => `
         <div class="option-item" onclick="selectOption(${i})" data-idx="${i}">
           <span class="option-letter">${letters[i]}</span>
-          <span>${escHtml(typeof opt === 'string' ? opt : opt.text || String(opt))}</span>
+          <span>${escHtml(typeof opt==='string'?opt:opt.text||String(opt))}</span>
         </div>`).join('')}
     </div>
     <div class="explanation-box" id="explanation-box">
@@ -1882,41 +1918,34 @@ function renderQuestion() {
   body.scrollTop = 0;
 }
 
-// ── FIX 2: selectOption renders explanation as HTML + shows explanation_images ───
 function selectOption(idx) {
   if (document.getElementById('btn-next').classList.contains('active')) return;
-  const q = quizQueue[currentQIdx];
+  const q       = quizQueue[currentQIdx];
   const correct = typeof q.correct === 'number' ? q.correct : typeof q.answer === 'number' ? q.answer : 0;
-  const items = document.querySelectorAll('.option-item');
+  const items   = document.querySelectorAll('.option-item');
   items.forEach(it => it.classList.add('disabled'));
   items[idx].classList.add('selected');
-  if (idx === correct) { items[idx].classList.add('correct'); correctCount++; document.getElementById('q-correct-live').textContent = correctCount; }
-  else { items[idx].classList.add('wrong'); if (items[correct]) items[correct].classList.add('correct'); }
-
+  if (idx === correct) {
+    items[idx].classList.add('correct'); correctCount++;
+    document.getElementById('q-correct-live').textContent = correctCount;
+  } else {
+    items[idx].classList.add('wrong');
+    if (items[correct]) items[correct].classList.add('correct');
+  }
   if (q.explanation) {
     const expEl = document.getElementById('explanation-text');
-    // Render as HTML so <strong>, <p> tags display properly
     expEl.innerHTML = q.explanation;
-
-    // Append explanation images if present
     const expImgs = q.explanation_images || [];
     if (expImgs.length) {
       expImgs.forEach(src => {
-        const wrap = document.createElement('div');
-        wrap.className = 'exp-img-wrap';
-        const img = document.createElement('img');
-        img.src = src;
-        img.className = 'exp-img';
-        img.alt = 'Explanation image';
-        img.onerror = () => { wrap.style.display = 'none'; };
-        wrap.appendChild(img);
-        expEl.appendChild(wrap);
+        const wrap = document.createElement('div'); wrap.className = 'exp-img-wrap';
+        const img  = document.createElement('img'); img.src = src; img.className = 'exp-img';
+        img.alt = 'Explanation image'; img.onerror = () => { wrap.style.display='none'; };
+        wrap.appendChild(img); expEl.appendChild(wrap);
       });
     }
-
     document.getElementById('explanation-box').classList.add('visible');
   }
-
   document.getElementById('btn-next').classList.add('active');
   document.querySelector('.quiz-body').scrollTop = 9999;
 }
@@ -1927,27 +1956,39 @@ function nextQuestion() {
   else { renderQuestion(); document.querySelector('.quiz-body').scrollTop = 0; }
 }
 
+// ── FIX 1: showResults — ALARM TONE STARTS HERE (after all MCQs) ──
 function showResults() {
   document.getElementById('quiz-overlay').classList.remove('visible');
   const total = quizQueue.length, pct = Math.round(correctCount/total*100);
-  document.getElementById('final-score').textContent = correctCount;
-  document.getElementById('final-total').textContent = total;
-  document.getElementById('stat-correct').textContent = correctCount;
-  document.getElementById('stat-wrong').textContent = total - correctCount;
-  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('final-score').textContent    = correctCount;
+  document.getElementById('final-total').textContent    = total;
+  document.getElementById('stat-correct').textContent   = correctCount;
+  document.getElementById('stat-wrong').textContent     = total - correctCount;
+  document.getElementById('stat-pct').textContent       = pct + '%';
+
   let emoji, title, sub;
-  if (pct >= 80) { emoji = '🏆'; title = 'Excellent Work!'; sub = `${pct}% — You're on the way to that PG seat!`; }
-  else if (pct >= 60) { emoji = '💪'; title = 'Good Effort!'; sub = `${pct}% — Keep grinding, future specialist!`; }
-  else { emoji = '📖'; title = 'Keep Studying!'; sub = `${pct}% — Revise these topics soon.`; }
+  if (pct >= 80)      { emoji='🏆'; title='Excellent Work!';  sub=`${pct}% — You're on the way to that PG seat!`; }
+  else if (pct >= 60) { emoji='💪'; title='Good Effort!';     sub=`${pct}% — Keep grinding, future specialist!`; }
+  else                { emoji='📖'; title='Keep Studying!';   sub=`${pct}% — Revise these topics soon.`; }
+
   document.getElementById('results-emoji').textContent = emoji;
   document.getElementById('results-title').textContent = title;
-  document.getElementById('results-sub').textContent = sub;
+  document.getElementById('results-sub').textContent   = sub;
   document.getElementById('results-overlay').classList.add('visible');
+
+  // ── FIX 1: Play alarm tone NOW — after all questions answered ──
+  if (activeAlarm) {
+    startAlarmAudio(activeAlarm);
+    document.getElementById('alarm-ringing-badge').style.display = 'flex';
+  }
   releaseWakeLock();
 }
 
 function dismissAlarmFinal() {
+  // FIX 1: Stop alarm tone when user taps "Stop Alarm & Start My Day"
+  stopAlarmAudio();
   document.getElementById('results-overlay').classList.remove('visible');
+  document.getElementById('alarm-ringing-badge').style.display = 'none';
   activeAlarm = null;
 }
 
@@ -1960,59 +2001,66 @@ async function loadQuestions() {
 }
 function updateQBankInfo() {
   const el = document.getElementById('qbank-info');
-  if (el) el.textContent = questions.length > 0 ? `${questions.length} questions loaded` : 'Using sample questions';
+  if (el) el.textContent = questions.length > 0 ? `${questions.length} questions loaded` : 'Using built-in sample questions';
 }
 function showQBankInfo() {
-  const total = questions.length > 0 ? questions.length : SAMPLE_QUESTIONS.length;
+  const total  = questions.length > 0 ? questions.length : SAMPLE_QUESTIONS.length;
   const source = questions.length > 0 ? 'Custom question bank' : 'Built-in sample bank';
-  alert(`📚 Question Bank\n${source}\n${total} questions available\n\nTo load your own questions, upload questions.json to your repo.`);
+  alert(`📚 Question Bank\n${source}\n${total} questions available\n\nTo load your own: upload questions.json to your repo.`);
 }
+
+// ── INSTALL ────────────────────────────────────────────────
+async function triggerInstall() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      deferredInstallPrompt = null;
+      document.getElementById('install-banner').classList.remove('visible');
+      document.getElementById('header-install-btn').classList.remove('show');
+    }
+  } else {
+    showInstallModal();
+  }
+}
+function showInstallModal()  { document.getElementById('modal-install').classList.add('visible'); }
+function closeModal(id)      { document.getElementById(id).classList.remove('visible'); }
 
 // ── DAILY TIMER ────────────────────────────────────────────
 function startStudyTimer() {
   const sub = document.getElementById('studySubject').value;
   if (!sub) { showToast('⚠️ Select a subject first'); return; }
   unlockAudio(); requestWakeLock();
-  dailyActiveSub = sub;
-  dailyActivePhase = document.getElementById('studyPhase').value;
+  dailyActiveSub = sub; dailyActivePhase = document.getElementById('studyPhase').value;
   dailyMode = 'study'; dailyIsPaused = false; dailyIsSkipped = false;
-  const h = parseInt(document.getElementById('studyHrs').value) || 0;
+  const h = parseInt(document.getElementById('studyHrs').value)  || 0;
   const m = parseInt(document.getElementById('studyMins').value) || 0;
   dailyInitDuration = h*3600 + m*60;
   if (dailyInitDuration <= 0) { showToast('⚠️ Set a study duration'); return; }
   dailyTimeLeft = dailyInitDuration;
   document.getElementById('timer-phase-badge').textContent = dailyActivePhase + ' — ' + dailyActiveSub;
-  document.getElementById('timer-btns-start').style.display = 'none';
+  document.getElementById('timer-btns-start').style.display   = 'none';
   document.getElementById('timer-btns-running').style.display = 'block';
   runDailyTimer();
 }
-
 function togglePause() {
   dailyIsPaused = !dailyIsPaused;
   document.getElementById('pauseBtn').textContent = dailyIsPaused ? '▶ Resume' : '⏸ Pause';
 }
-
 function skipStudyTimer() {
   clearInterval(timerInterval);
-  if (dailyMode === 'study') {
-    dailyElapsed = dailyInitDuration - dailyTimeLeft;
-    dailyIsSkipped = true;
-    openMcqPopup();
-  } else {
-    openBreakPopup();
-  }
+  if (dailyMode === 'study') { dailyElapsed = dailyInitDuration - dailyTimeLeft; dailyIsSkipped = true; openMcqPopup(); }
+  else openBreakPopup();
 }
-
 function stopSession() {
   clearInterval(timerInterval); stopAlarmAudio(); releaseWakeLock();
   dailyMode = 'idle'; dailyIsPaused = false;
-  document.getElementById('timer-display').textContent = '00:00:00';
-  document.getElementById('timer-phase-badge').textContent = '';
-  document.getElementById('timer-btns-start').style.display = 'block';
+  document.getElementById('timer-display').textContent      = '00:00:00';
+  document.getElementById('timer-phase-badge').textContent  = '';
+  document.getElementById('timer-btns-start').style.display   = 'block';
   document.getElementById('timer-btns-running').style.display = 'none';
   closeDailyPopups();
 }
-
 function runDailyTimer() {
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
@@ -2024,42 +2072,26 @@ function runDailyTimer() {
       document.getElementById('timer-display').textContent =
         `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
       if (dailyTimeLeft <= 0) {
-        clearInterval(timerInterval);
-        playBeep();
-        if (dailyMode === 'study') {
-          dailyElapsed = dailyInitDuration; dailyIsSkipped = false;
-          openMcqPopup();
-        } else {
-          openBreakPopup();
-        }
+        clearInterval(timerInterval); playBeep();
+        if (dailyMode === 'study') { dailyElapsed = dailyInitDuration; dailyIsSkipped = false; openMcqPopup(); }
+        else openBreakPopup();
       }
     }
   }, 1000);
 }
-
 function playBeep() {
   try {
-    const ctx = getAudioCtx(), gain = ctx.createGain();
-    gain.gain.value = 0.5; gain.connect(ctx.destination);
-    const osc = ctx.createOscillator(); osc.connect(gain);
-    osc.frequency.value = 880; osc.start(); osc.stop(ctx.currentTime + 0.3);
-    const osc2 = ctx.createOscillator(); osc2.connect(gain);
-    osc2.frequency.value = 1108; osc2.start(ctx.currentTime + 0.35); osc2.stop(ctx.currentTime + 0.65);
+    const ctx = getAudioCtx(), gain = ctx.createGain(); gain.gain.value = 0.5; gain.connect(ctx.destination);
+    const o = ctx.createOscillator(); o.connect(gain); o.frequency.value = 880; o.start(); o.stop(ctx.currentTime+0.3);
+    const o2 = ctx.createOscillator(); o2.connect(gain); o2.frequency.value = 1108; o2.start(ctx.currentTime+0.35); o2.stop(ctx.currentTime+0.65);
   } catch(e) {}
 }
-
-function openMcqPopup() {
-  document.getElementById('cycleMcqs').value = '';
-  document.getElementById('mcq-popup-bg').classList.add('visible');
-}
-function openBreakPopup() {
-  document.getElementById('break-popup-bg').classList.add('visible');
-}
+function openMcqPopup()     { document.getElementById('cycleMcqs').value = ''; document.getElementById('mcq-popup-bg').classList.add('visible'); }
+function openBreakPopup()   { document.getElementById('break-popup-bg').classList.add('visible'); }
 function closeDailyPopups() {
   document.getElementById('mcq-popup-bg').classList.remove('visible');
   document.getElementById('break-popup-bg').classList.remove('visible');
 }
-
 function startBreak() {
   const mcqs = parseInt(document.getElementById('cycleMcqs').value) || 0;
   saveDailyLog(dailyActiveSub, mcqs, Math.floor(dailyElapsed/60), dailyActivePhase, dailyIsSkipped);
@@ -2069,7 +2101,6 @@ function startBreak() {
   document.getElementById('timer-phase-badge').textContent = '☕ Break Time';
   runDailyTimer();
 }
-
 function continueNextCycle() {
   document.getElementById('break-popup-bg').classList.remove('visible');
   dailyMode = 'study'; dailyIsPaused = false; dailyIsSkipped = false;
@@ -2077,24 +2108,18 @@ function continueNextCycle() {
   document.getElementById('timer-phase-badge').textContent = dailyActivePhase + ' — ' + dailyActiveSub;
   runDailyTimer();
 }
-
 function saveDailyLog(subject, mcqs, durationMins, phase, skipped) {
   const logs = JSON.parse(localStorage.getItem(DAILY_KEY) || '[]');
-  const now = new Date();
-  const dd = String(now.getDate()).padStart(2,'0');
-  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const now  = new Date();
+  const dd   = String(now.getDate()).padStart(2,'0');
+  const mm   = String(now.getMonth()+1).padStart(2,'0');
   const yyyy = now.getFullYear();
-  logs.unshift({ date:`${dd}/${mm}/${yyyy}`, subject, mcqs, duration: durationMins, phase, skipped: skipped||false });
+  logs.unshift({ date:`${dd}/${mm}/${yyyy}`, subject, mcqs, duration:durationMins, phase, skipped:skipped||false });
   localStorage.setItem(DAILY_KEY, JSON.stringify(logs));
   renderDailyUI();
 }
-
 function clearDailyLogs() {
-  if (confirm('Clear all daily study logs?')) {
-    localStorage.removeItem(DAILY_KEY);
-    renderDailyUI();
-    showToast('🗑️ Daily logs cleared');
-  }
+  if (confirm('Clear all daily study logs?')) { localStorage.removeItem(DAILY_KEY); renderDailyUI(); showToast('🗑️ Daily logs cleared'); }
 }
 
 // ── DAILY UI RENDER ────────────────────────────────────────
@@ -2104,19 +2129,11 @@ function renderDailyUI() {
   if (now - lastDailyRender < 300) return;
   lastDailyRender = now;
   const logs = JSON.parse(localStorage.getItem(DAILY_KEY) || '[]');
-  renderDailyLog(logs);
-  renderPhaseMatrix(logs);
-  renderMcqMatrix(logs);
-  renderDailyCharts(logs);
+  renderDailyLog(logs); renderPhaseMatrix(logs); renderMcqMatrix(logs); renderDailyCharts(logs);
 }
-
 function renderDailyLog(logs) {
-  const tbody = document.getElementById('dailyLogBody');
-  if (!tbody) return;
-  if (logs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">No sessions yet</td></tr>`;
-    return;
-  }
+  const tbody = document.getElementById('dailyLogBody'); if (!tbody) return;
+  if (logs.length === 0) { tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">No sessions yet</td></tr>`; return; }
   const byDate = {};
   logs.forEach(l => {
     if (!byDate[l.date]) byDate[l.date] = { hrs:0, cycles:0, mcqs:0, subjects:new Set() };
@@ -2125,135 +2142,73 @@ function renderDailyLog(logs) {
     byDate[l.date].mcqs += l.mcqs||0;
     byDate[l.date].subjects.add(l.subject);
   });
-  tbody.innerHTML = Object.entries(byDate).slice(0,30).map(([date, d]) =>
-    `<tr>
-      <td style="color:var(--text2)">${date}</td>
-      <td style="color:var(--primary)">${d.hrs.toFixed(1)}</td>
-      <td style="color:var(--text2)">${d.cycles}</td>
-      <td style="color:var(--green)">${d.mcqs}</td>
-      <td style="color:var(--text3);font-size:9px">${[...d.subjects].join(', ')}</td>
-    </tr>`
+  tbody.innerHTML = Object.entries(byDate).slice(0,30).map(([date,d]) =>
+    `<tr><td style="color:var(--text2)">${date}</td><td style="color:var(--primary)">${d.hrs.toFixed(1)}</td><td style="color:var(--text2)">${d.cycles}</td><td style="color:var(--green)">${d.mcqs}</td><td style="color:var(--text3);font-size:9px">${[...d.subjects].join(', ')}</td></tr>`
   ).join('');
 }
-
 function renderPhaseMatrix(logs) {
-  const tbody = document.getElementById('matrixBody');
-  if (!tbody) return;
+  const tbody = document.getElementById('matrixBody'); if (!tbody) return;
   const phases = ['First Reading','Second Reading','Third Reading','Extra Bonus'];
   const matrix = {};
   SUBJECTS_19.forEach(s => { matrix[s] = {0:0,1:0,2:0,3:0}; });
-  logs.forEach(l => {
-    const pi = phases.indexOf(l.phase);
-    if (pi < 0 || !matrix[l.subject]) return;
-    matrix[l.subject][pi]++;
-  });
+  logs.forEach(l => { const pi=phases.indexOf(l.phase); if(pi<0||!matrix[l.subject])return; matrix[l.subject][pi]++; });
   tbody.innerHTML = SUBJECTS_19.map(s => {
-    const r = matrix[s];
-    const total = r[0]+r[1]+r[2]+r[3];
-    if (total === 0) return '';
-    return `<tr>
-      <td class="matrix-row-head">${s}</td>
-      <td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td>
-    </tr>`;
+    const r=matrix[s]; const total=r[0]+r[1]+r[2]+r[3]; if(total===0)return'';
+    return `<tr><td class="matrix-row-head">${s}</td><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`;
   }).join('');
 }
-
 function renderMcqMatrix(logs) {
-  const tbody = document.getElementById('mcqMatrixBody');
-  if (!tbody) return;
+  const tbody = document.getElementById('mcqMatrixBody'); if (!tbody) return;
   const phases = ['First Reading','Second Reading','Third Reading','Extra Bonus'];
   const matrix = {};
   SUBJECTS_19.forEach(s => { matrix[s] = {0:0,1:0,2:0,3:0}; });
-  logs.forEach(l => {
-    const pi = phases.indexOf(l.phase);
-    if (pi < 0 || !matrix[l.subject]) return;
-    matrix[l.subject][pi] += l.mcqs||0;
-  });
+  logs.forEach(l => { const pi=phases.indexOf(l.phase); if(pi<0||!matrix[l.subject])return; matrix[l.subject][pi]+=l.mcqs||0; });
   tbody.innerHTML = SUBJECTS_19.map(s => {
-    const r = matrix[s];
-    const total = r[0]+r[1]+r[2]+r[3];
-    if (total === 0) return '';
-    return `<tr>
-      <td class="matrix-row-head">${s}</td>
-      <td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td>
-    </tr>`;
+    const r=matrix[s]; const total=r[0]+r[1]+r[2]+r[3]; if(total===0)return'';
+    return `<tr><td class="matrix-row-head">${s}</td><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`;
   }).join('');
 }
-
 function renderDailyCharts(logs) {
-  const vd = currentViewDate;
-  const yr = vd.getFullYear(), mo = vd.getMonth();
+  const vd = currentViewDate; const yr = vd.getFullYear(), mo = vd.getMonth();
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('monthDisplay').textContent = `${months[mo].toUpperCase()} ${yr}`;
-  const daysInMonth = new Date(yr, mo+1, 0).getDate();
-  const labels = Array.from({length:daysInMonth},(_,i)=>i+1);
+  const daysInMonth = new Date(yr,mo+1,0).getDate();
+  const labels  = Array.from({length:daysInMonth},(_,i)=>i+1);
   const hrsData = new Array(daysInMonth).fill(0);
   const mcqData = new Array(daysInMonth).fill(0);
-  (logs || JSON.parse(localStorage.getItem(DAILY_KEY)||'[]')).forEach(l => {
-    const parts = l.date.split('/');
-    if (!parts[2]) return;
-    const lm = parseInt(parts[1])-1, ld = parseInt(parts[0])-1, ly = parseInt(parts[2]);
-    if (ly === yr && lm === mo && ld >= 0 && ld < daysInMonth) {
-      hrsData[ld] += (l.duration||0)/60;
-      mcqData[ld] += l.mcqs||0;
-    }
+  (logs||JSON.parse(localStorage.getItem(DAILY_KEY)||'[]')).forEach(l => {
+    const parts=l.date.split('/'); if(!parts[2])return;
+    const lm=parseInt(parts[1])-1,ld=parseInt(parts[0])-1,ly=parseInt(parts[2]);
+    if(ly===yr&&lm===mo&&ld>=0&&ld<daysInMonth){ hrsData[ld]+=(l.duration||0)/60; mcqData[ld]+=l.mcqs||0; }
   });
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-  const textColor = isDark ? '#4A7A9B' : '#7BA7C8';
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  const gridColor = isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
+  const textColor = isDark?'#4A7A9B':'#7BA7C8';
   const chartOpts = {
-    responsive:true, maintainAspectRatio:false,
+    responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false}},
     scales:{
       x:{ticks:{color:textColor,font:{size:8},maxRotation:0},grid:{color:gridColor}},
       y:{ticks:{color:textColor,font:{size:9}},grid:{color:gridColor},beginAtZero:true}
     }
   };
-  if (hChart) hChart.destroy();
-  if (mChart) mChart.destroy();
+  if (hChart) hChart.destroy(); if (mChart) mChart.destroy();
   const hCtx = document.getElementById('hoursChart');
   const mCtx = document.getElementById('mcqChart');
-  if (!hCtx || !mCtx) return;
-  hChart = new Chart(hCtx, {
-    type:'bar',
-    data:{labels,datasets:[{data:hrsData,backgroundColor:'rgba(66,165,245,0.6)',borderColor:'#42A5F5',borderWidth:1,borderRadius:3}]},
-    options: JSON.parse(JSON.stringify(chartOpts))
-  });
-  mChart = new Chart(mCtx, {
-    type:'bar',
-    data:{labels,datasets:[{data:mcqData,backgroundColor:'rgba(76,175,80,0.6)',borderColor:'#4CAF50',borderWidth:1,borderRadius:3}]},
-    options: JSON.parse(JSON.stringify(chartOpts))
-  });
+  if (!hCtx||!mCtx) return;
+  hChart = new Chart(hCtx, { type:'bar', data:{labels,datasets:[{data:hrsData,backgroundColor:'rgba(66,165,245,0.6)',borderColor:'#42A5F5',borderWidth:1,borderRadius:3}]}, options:JSON.parse(JSON.stringify(chartOpts)) });
+  mChart = new Chart(mCtx, { type:'bar', data:{labels,datasets:[{data:mcqData,backgroundColor:'rgba(76,175,80,0.6)',borderColor:'#4CAF50',borderWidth:1,borderRadius:3}]}, options:JSON.parse(JSON.stringify(chartOpts)) });
 }
-
 function changeViewMonth(dir) {
-  currentViewDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + dir, 1);
+  currentViewDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth()+dir, 1);
   renderDailyCharts();
-}
-
-// ── INSTALL ────────────────────────────────────────────────
-async function triggerInstall() {
-  if (deferredInstallPrompt) {
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-    if (outcome === 'accepted') { deferredInstallPrompt = null; document.getElementById('install-banner').style.display='none'; }
-  }
-}
-function showInstallModal() {
-  document.getElementById('modal-install').classList.add('visible');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('visible');
 }
 
 // ── TOAST ──────────────────────────────────────────────────
 let toastTimeout;
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => t.classList.remove('show'), 2600);
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimeout); toastTimeout = setTimeout(()=>t.classList.remove('show'),2600);
 }
 
 // ── SAMPLE QUESTIONS (fallback) ────────────────────────────

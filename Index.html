@@ -90,7 +90,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);user
 /* ── BOTTOM SHEET ────────────────────────────────────────── */
 .sheet-backdrop{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:none;opacity:0;transition:opacity .3s}
 .sheet-backdrop.visible{display:block;opacity:1}
-.bottom-sheet{position:fixed;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;bottom:0;z-index:41;background:var(--bg);border-radius:20px 20px 0 0;border-top:1px solid var(--border);max-height:92vh;overflow-y:auto;transition:transform .35s cubic-bezier(.4,0,.2,1);padding-bottom:calc(24px + var(--safe-bottom))}
+.bottom-sheet{position:fixed;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;bottom:0;z-index:41;background:var(--bg);border-radius:20px 20px 0 0;border-top:1px solid var(--border);max-height:92vh;overflow:hidden;transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.sheet-scroll{flex:1;overflow-y:auto;overflow-x:hidden;}
+.sheet-scroll::-webkit-scrollbar{display:none}
+.sheet-footer{flex-shrink:0;background:var(--bg);border-top:1px solid var(--border);padding:10px 14px calc(14px + var(--safe-bottom))}
 .bottom-sheet.visible{transform:translateX(-50%) translateY(0)}
 .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:10px auto 4px}
 .sheet-title{font-size:16px;font-weight:900;padding:8px 16px 14px;color:var(--text);text-align:center;border-bottom:1px solid var(--border)}
@@ -243,9 +246,15 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 .month-name{font-size:14px;font-weight:800;color:var(--primary);text-transform:uppercase}
 .chart-wrap{height:180px;position:relative;margin:10px 0}
 .chart-title{font-size:10px;font-weight:800;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.log-table{width:100%;font-size:10px;border-collapse:collapse;margin-top:6px}
-.log-table th,.log-table td{padding:8px 4px;border-bottom:1px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.log-table th{color:var(--text3);font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.log-table{width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;table-layout:fixed}
+.log-table th,.log-table td{padding:9px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+.log-table th{color:var(--text3);font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.5px;text-align:left}
+.log-table td{text-align:left}
+.log-table .col-date{width:23%}
+.log-table .col-hrs{width:13%;text-align:center}
+.log-table .col-cyc{width:10%;text-align:center}
+.log-table .col-mcq{width:13%;text-align:center}
+.log-table .col-sub{width:41%;word-break:break-word;white-space:normal;line-height:1.4}
 .matrix-table{width:100%;font-size:10px;border-collapse:collapse;margin-top:6px}
 .matrix-table th,.matrix-table td{border:1px solid var(--border);padding:5px 3px;text-align:center}
 .matrix-table th{background:var(--psoft);color:var(--text2);font-weight:800;font-size:9px}
@@ -416,7 +425,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
       <div class="card-title">📋 Daily Log</div>
       <div style="overflow-x:auto">
         <table class="log-table">
-          <thead><tr><th style="width:22%">Date</th><th style="width:13%">Hrs</th><th style="width:11%">Cyc</th><th style="width:14%">MCQ</th><th>Subjects</th></tr></thead>
+          <thead><tr>
+            <th class="col-date">Date</th>
+            <th class="col-hrs">Hrs</th>
+            <th class="col-cyc">Cyc</th>
+            <th class="col-mcq">MCQ</th>
+            <th class="col-sub">Subjects</th>
+          </tr></thead>
           <tbody id="dailyLogBody"></tbody>
         </table>
       </div>
@@ -544,45 +559,48 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 <div class="bottom-sheet" id="add-alarm-sheet">
   <div class="sheet-handle"></div>
   <div class="sheet-title" id="add-sheet-title">New Alarm</div>
-  <div class="time-picker-wrap">
-    <div class="time-display" id="time-display" onclick="openTimePicker()">06:00</div>
-    <div class="time-ampm" id="time-ampm-label">AM</div>
-    <input type="time" id="time-input" class="time-input-hidden" value="06:00" onchange="syncTimeDisplay()">
-    <div class="time-tap-hint">Tap time to change</div>
-  </div>
-  <div class="form-section">
-    <div class="form-group"><label class="form-label">Alarm Label</label><input type="text" class="form-input" id="alarm-label-input" placeholder="e.g. Morning Study" maxlength="40"></div>
-    <div class="form-group"><label class="form-label">Exam Filter</label>
-      <div class="chip-group" id="exam-chips">
-        <div class="chip selected" data-val="ALL">All</div><div class="chip" data-val="NEET PG">NEET PG</div>
-        <div class="chip" data-val="INICET">INICET</div><div class="chip" data-val="FMGE">FMGE</div>
-        <div class="chip" data-val="UPSC CMS">UPSC CMS</div>
-      </div></div>
-    <div class="form-group"><label class="form-label">Repeat Days</label>
-      <div class="chip-group" id="day-chips">
-        <div class="chip" data-day="0">Su</div><div class="chip selected" data-day="1">Mo</div>
-        <div class="chip selected" data-day="2">Tu</div><div class="chip selected" data-day="3">We</div>
-        <div class="chip selected" data-day="4">Th</div><div class="chip selected" data-day="5">Fr</div>
-        <div class="chip" data-day="6">Sa</div>
-      </div></div>
-    <div class="form-group"><label class="form-label">Questions to Answer</label>
-      <div class="chip-group" id="q-count-chips">
-        <div class="chip" data-val="5">5</div><div class="chip selected" data-val="15">15</div>
-        <div class="chip" data-val="20">20</div><div class="chip" data-val="30">30</div>
-      </div></div>
-    <div class="form-group"><label class="form-label">Alarm Sound</label>
-      <div class="ringtone-list" id="ringtone-list">
-        <div class="ringtone-item selected" data-sound="beep"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Hospital Beep</div><div class="ringtone-desc">Classic monitor beep pattern</div></div><span class="ringtone-play" onclick="previewSound('beep',event)">▶️</span></div>
-        <div class="ringtone-item" data-sound="siren"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Code Blue Siren</div><div class="ringtone-desc">Ascending urgent siren</div></div><span class="ringtone-play" onclick="previewSound('siren',event)">▶️</span><span class="ringtone-volume">LOUD</span></div>
-        <div class="ringtone-item" data-sound="buzzer"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">ICU Alarm</div><div class="ringtone-desc">Loud continuous buzzer</div></div><span class="ringtone-play" onclick="previewSound('buzzer',event)">▶️</span><span class="ringtone-volume">LOUDEST</span></div>
-        <div class="ringtone-item" data-sound="custom"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Custom Music</div><div class="ringtone-desc" id="custom-music-name">No file chosen</div></div><span onclick="triggerMusicUpload(event)">📁</span><input type="file" id="music-upload" accept="audio/*" style="display:none" onchange="handleMusicUpload(event)"></div>
-      </div></div>
-    <div class="form-group"><label class="form-label">Volume — <span id="vol-display">80</span>%</label>
-      <div class="range-wrap"><input type="range" id="volume-slider" min="10" max="100" value="80" oninput="document.getElementById('vol-display').textContent=this.value;this.style.setProperty('--val',this.value+'%')"></div>
+  <div class="sheet-scroll">
+    <div class="time-picker-wrap">
+      <div class="time-display" id="time-display" onclick="openTimePicker()">06:00</div>
+      <div class="time-ampm" id="time-ampm-label">AM</div>
+      <input type="time" id="time-input" class="time-input-hidden" value="06:00" onchange="syncTimeDisplay()">
+      <div class="time-tap-hint">Tap time to change</div>
     </div>
+    <div class="form-section">
+      <div class="form-group"><label class="form-label">Alarm Label</label><input type="text" class="form-input" id="alarm-label-input" placeholder="e.g. Morning Study" maxlength="40"></div>
+      <div class="form-group"><label class="form-label">Exam Filter</label>
+        <div class="chip-group" id="exam-chips">
+          <div class="chip selected" data-val="ALL">All</div><div class="chip" data-val="NEET PG">NEET PG</div>
+          <div class="chip" data-val="INICET">INICET</div><div class="chip" data-val="FMGE">FMGE</div>
+          <div class="chip" data-val="UPSC CMS">UPSC CMS</div>
+        </div></div>
+      <div class="form-group"><label class="form-label">Repeat Days</label>
+        <div class="chip-group" id="day-chips">
+          <div class="chip" data-day="0">Su</div><div class="chip selected" data-day="1">Mo</div>
+          <div class="chip selected" data-day="2">Tu</div><div class="chip selected" data-day="3">We</div>
+          <div class="chip selected" data-day="4">Th</div><div class="chip selected" data-day="5">Fr</div>
+          <div class="chip" data-day="6">Sa</div>
+        </div></div>
+      <div class="form-group"><label class="form-label">Questions to Answer</label>
+        <div class="chip-group" id="q-count-chips">
+          <div class="chip" data-val="5">5</div><div class="chip selected" data-val="15">15</div>
+          <div class="chip" data-val="20">20</div><div class="chip" data-val="30">30</div>
+        </div></div>
+      <div class="form-group"><label class="form-label">Alarm Sound</label>
+        <div class="ringtone-list" id="ringtone-list">
+          <div class="ringtone-item selected" data-sound="beep"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Hospital Beep</div><div class="ringtone-desc">Classic monitor beep pattern</div></div><span class="ringtone-play" onclick="previewSound('beep',event)">▶️</span></div>
+          <div class="ringtone-item" data-sound="siren"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Code Blue Siren</div><div class="ringtone-desc">Ascending urgent siren</div></div><span class="ringtone-play" onclick="previewSound('siren',event)">▶️</span><span class="ringtone-volume">LOUD</span></div>
+          <div class="ringtone-item" data-sound="buzzer"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">ICU Alarm</div><div class="ringtone-desc">Loud continuous buzzer</div></div><span class="ringtone-play" onclick="previewSound('buzzer',event)">▶️</span><span class="ringtone-volume">LOUDEST</span></div>
+          <div class="ringtone-item" data-sound="custom"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Custom Music</div><div class="ringtone-desc" id="custom-music-name">No file chosen</div></div><span onclick="triggerMusicUpload(event)">📁</span><input type="file" id="music-upload" accept="audio/*" style="display:none" onchange="handleMusicUpload(event)"></div>
+        </div></div>
+      <div class="form-group"><label class="form-label">Volume — <span id="vol-display">80</span>%</label>
+        <div class="range-wrap"><input type="range" id="volume-slider" min="10" max="100" value="80" oninput="document.getElementById('vol-display').textContent=this.value;this.style.setProperty('--val',this.value+'%')"></div>
+      </div>
+    </div>
+  </div><!-- end .sheet-scroll -->
+  <div class="sheet-footer">
+    <button class="btn-primary" style="width:100%;margin:0" onclick="saveAlarm()">⏰ Set Alarm</button>
   </div>
-  <button class="btn-primary" onclick="saveAlarm()">⏰ Set Alarm</button>
-  <div style="height:8px"></div>
 </div>
 
 <!-- ── ALARM OVERLAY ──────────────────────────────── -->
@@ -656,7 +674,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 </div>
 
 <!-- ── DAILY POPUPS ────────────────────────────────── -->
-<div class="popup-backdrop" id="mcq-popup-bg"><div class="popup-card"><h3>Cycle Done!</h3><p>MCQs solved this cycle?</p><input type="number" class="popup-input" id="cycleMcqs" placeholder="0" min="0"><div class="popup-btns"><button class="popup-btn popup-btn-primary" onclick="startBreak()">✅ Save & Start Break</button></div></div></div>
+<div class="popup-backdrop" id="mcq-popup-bg"><div class="popup-card"><h3 id="mcq-popup-title">Cycle Done!</h3><p id="mcq-popup-sub">MCQs solved this cycle?</p><input type="number" class="popup-input" id="cycleMcqs" placeholder="0" min="0"><div class="popup-btns"><button class="popup-btn popup-btn-primary" id="mcq-popup-save-btn" onclick="startBreak()">✅ Save & Start Break</button></div></div></div>
 <div class="popup-backdrop" id="break-popup-bg"><div class="popup-card"><h3>☕ Break Over!</h3><p>Ready for next cycle?</p><div class="popup-btns"><button class="popup-btn popup-btn-cont" onclick="continueNextCycle()">▶ Start Next Cycle</button><button class="popup-btn popup-btn-end" onclick="stopSession()">■ End Session</button></div></div></div>
 
 <!-- ── INSTALL MODAL ──────────────────────────────── -->
@@ -1532,7 +1550,36 @@ function startStudyTimer(){
 }
 function togglePause(){ dailyIsPaused=!dailyIsPaused; document.getElementById('pauseBtn').textContent=dailyIsPaused?'▶ Resume':'⏸ Pause'; }
 function skipStudyTimer(){ clearInterval(timerInterval);if(dailyMode==='study'){dailyElapsed=dailyInitDuration-dailyTimeLeft;dailyIsSkipped=true;openMcqPopup();}else openBreakPopup(); }
-function stopSession(){ clearInterval(timerInterval);stopAlarmAudio();releaseWakeLock();dailyMode='idle';dailyIsPaused=false;document.getElementById('timer-display').textContent='00:00:00';document.getElementById('timer-phase-badge').textContent='';document.getElementById('timer-btns-start').style.display='block';document.getElementById('timer-btns-running').style.display='none';closeDailyPopups(); }
+
+// End button — if studying, ask for MCQ count first, then stop
+function stopSession(){
+  clearInterval(timerInterval);
+  if(dailyMode==='study' && dailyActiveSub){
+    // Calculate elapsed time so far
+    dailyElapsed = dailyInitDuration - dailyTimeLeft;
+    dailyIsSkipped = true;
+    // Show MCQ popup — startBreak() will save and then we fully reset
+    document.getElementById('cycleMcqs').value='';
+    document.getElementById('mcq-popup-bg').classList.add('visible');
+    // Override the "Save & Start Break" button to "Save & End Session" for this flow
+    _endingSession = true;
+  } else {
+    _hardStop();
+  }
+}
+
+// Internal flag so startBreak knows to stop instead of starting break
+let _endingSession = false;
+
+function _hardStop(){
+  stopAlarmAudio();releaseWakeLock();
+  dailyMode='idle';dailyIsPaused=false;_endingSession=false;
+  document.getElementById('timer-display').textContent='00:00:00';
+  document.getElementById('timer-phase-badge').textContent='';
+  document.getElementById('timer-btns-start').style.display='block';
+  document.getElementById('timer-btns-running').style.display='none';
+  closeDailyPopups();
+}
 function runDailyTimer(){
   clearInterval(timerInterval);
   timerInterval=setInterval(()=>{
@@ -1549,13 +1596,32 @@ function playBeep(){
   const o=ctx.createOscillator();o.connect(g);o.frequency.value=880;o.start();o.stop(ctx.currentTime+0.3);
   const o2=ctx.createOscillator();o2.connect(g);o2.frequency.value=1108;o2.start(ctx.currentTime+0.35);o2.stop(ctx.currentTime+0.65);}catch(e){}
 }
-function openMcqPopup(){ document.getElementById('cycleMcqs').value=''; document.getElementById('mcq-popup-bg').classList.add('visible'); }
+function openMcqPopup(){
+  document.getElementById('cycleMcqs').value='';
+  if(_endingSession){
+    document.getElementById('mcq-popup-title').textContent='End Session';
+    document.getElementById('mcq-popup-sub').textContent='MCQs solved before ending?';
+    document.getElementById('mcq-popup-save-btn').textContent='✅ Save & End Session';
+  } else {
+    document.getElementById('mcq-popup-title').textContent='Cycle Done!';
+    document.getElementById('mcq-popup-sub').textContent='MCQs solved this cycle?';
+    document.getElementById('mcq-popup-save-btn').textContent='✅ Save & Start Break';
+  }
+  document.getElementById('mcq-popup-bg').classList.add('visible');
+}
 function openBreakPopup(){ document.getElementById('break-popup-bg').classList.add('visible'); }
 function closeDailyPopups(){ document.getElementById('mcq-popup-bg').classList.remove('visible'); document.getElementById('break-popup-bg').classList.remove('visible'); }
 function startBreak(){
   const mcqs=parseInt(document.getElementById('cycleMcqs').value)||0;
   saveDailyLog(dailyActiveSub,mcqs,Math.floor(dailyElapsed/60),dailyActivePhase,dailyIsSkipped);
   document.getElementById('mcq-popup-bg').classList.remove('visible');
+  if(_endingSession){
+    // User tapped End — log saved, now fully stop
+    _hardStop();
+    showToast('✅ Session saved!');
+    return;
+  }
+  // Normal flow — start break
   dailyMode='break'; dailyIsPaused=false; dailyTimeLeft=parseInt(document.getElementById('breakMins').value)*60;
   document.getElementById('timer-phase-badge').textContent='☕ Break Time';
   runDailyTimer();
@@ -1587,7 +1653,13 @@ function renderDailyLog(logs){
   if(!logs.length){tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px">No sessions yet</td></tr>`;return;}
   const byDate={};
   logs.forEach(l=>{if(!byDate[l.date])byDate[l.date]={hrs:0,cycles:0,mcqs:0,subjects:new Set()};byDate[l.date].hrs+=(l.duration||0)/60;byDate[l.date].cycles++;byDate[l.date].mcqs+=l.mcqs||0;byDate[l.date].subjects.add(l.subject);});
-  tbody.innerHTML=Object.entries(byDate).slice(0,30).map(([date,d])=>`<tr><td style="color:var(--text2)">${date}</td><td style="color:var(--primary)">${d.hrs.toFixed(1)}</td><td style="color:var(--text2)">${d.cycles}</td><td style="color:var(--green)">${d.mcqs}</td><td style="color:var(--text3);font-size:9px">${[...d.subjects].join(', ')}</td></tr>`).join('');
+  tbody.innerHTML=Object.entries(byDate).slice(0,30).map(([date,d])=>`<tr>
+    <td class="col-date" style="color:var(--text2);font-size:10px">${date}</td>
+    <td class="col-hrs" style="color:var(--primary);font-weight:800">${d.hrs.toFixed(1)}</td>
+    <td class="col-cyc" style="color:var(--text2)">${d.cycles}</td>
+    <td class="col-mcq" style="color:var(--green);font-weight:800">${d.mcqs}</td>
+    <td class="col-sub" style="color:var(--text3);font-size:10px">${[...d.subjects].join(', ')}</td>
+  </tr>`).join('');
 }
 function renderPhaseMatrix(logs){
   const tbody=document.getElementById('matrixBody');if(!tbody)return;

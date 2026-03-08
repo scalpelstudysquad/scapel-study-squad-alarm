@@ -125,10 +125,7 @@ input[type="range"]{width:100%;height:4px;-webkit-appearance:none;appearance:non
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--primary);box-shadow:0 1px 6px rgba(0,0,0,.3)}
 .btn-primary{width:calc(100% - 28px);margin:0 14px 8px;padding:15px;border-radius:var(--radius);background:var(--pgrad);color:white;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;border:none;cursor:pointer;box-shadow:0 4px 16px var(--psoft);transition:all .2s}
 .btn-primary:active{transform:scale(.97)}
-/* ═══════════════════════════════════════════════════════════
-   ALARM OVERLAY
-   Audio starts HERE and runs through quiz → only stops at results
-═══════════════════════════════════════════════════════════ */
+/* ── ALARM OVERLAY ───────────────────────────────────────── */
 #alarm-overlay{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;background:var(--bg)}
 #alarm-overlay.visible{display:flex}
 #alarm-overlay::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(66,165,245,.2) 0%,transparent 65%),radial-gradient(ellipse at 80% 80%,rgba(13,71,161,.15) 0%,transparent 50%);animation:bgPulse 2s ease-in-out infinite}
@@ -138,20 +135,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 @keyframes spin360{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .alarm-icon-inner{width:100%;height:100%;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:spin360 6s linear infinite reverse}
 .alarm-icon-inner img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-/* Ringing pulse ring around logo */
 .alarm-pulse-ring{position:absolute;width:100px;height:100px;border-radius:50%;border:3px solid var(--primary);top:0;left:50%;transform:translateX(-50%);animation:pulseRing 1.2s ease-out infinite;pointer-events:none}
 @keyframes pulseRing{0%{transform:translateX(-50%) scale(1);opacity:.8}100%{transform:translateX(-50%) scale(1.8);opacity:0}}
 .alarm-logo-wrap{position:relative;width:100px;margin:0 auto 18px}
 .alarm-now-time{font-family:'Roboto',monospace;font-size:52px;font-weight:700;letter-spacing:-2px;color:var(--primary);line-height:1}
 .alarm-title-label{font-size:20px;font-weight:900;color:var(--text);margin:8px 0 4px}
 .alarm-exam-badge{display:inline-block;padding:4px 14px;background:var(--psoft);border:1px solid var(--primary);border-radius:20px;font-size:11px;font-weight:800;color:var(--primary);margin-bottom:14px}
-/* Alarm ringing status bar */
-.alarm-ringing-bar{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:9px 16px;margin-bottom:14px;
-  background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.4);
-  border-radius:12px;
-}
+.alarm-ringing-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;margin-bottom:14px;background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.4);border-radius:12px}
 .alarm-ringing-dot{width:9px;height:9px;border-radius:50%;background:#EF5350;animation:blink .7s ease-in-out infinite;flex-shrink:0}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.2;transform:scale(.7)}}
 .alarm-ringing-text{font-size:12px;font-weight:800;color:#EF5350;letter-spacing:.5px}
@@ -160,21 +150,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 .btn-dismiss{padding:18px;border-radius:var(--radius);background:var(--pgrad);color:white;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;border:none;cursor:pointer;box-shadow:0 4px 20px var(--psoft);transition:all .2s;animation:btnPulse 1.5s ease-in-out infinite}
 @keyframes btnPulse{0%,100%{box-shadow:0 4px 20px var(--psoft)}50%{box-shadow:0 4px 30px rgba(66,165,245,.7)}}
 .btn-dismiss:active{transform:scale(.97)}
-/* No snooze button — replaced with a locked warning */
-.no-snooze-warning{
-  padding:11px 16px;border-radius:var(--radius);
-  background:rgba(239,83,80,.08);border:1px solid rgba(239,83,80,.3);
-  color:#EF5350;font-size:12px;font-weight:700;text-align:center;
-}
+.no-snooze-warning{padding:11px 16px;border-radius:var(--radius);background:rgba(239,83,80,.08);border:1px solid rgba(239,83,80,.3);color:#EF5350;font-size:12px;font-weight:700;text-align:center}
 .volume-note{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.4;padding:0 4px}
 /* ── QUIZ OVERLAY ────────────────────────────────────────── */
 #quiz-overlay{position:fixed;inset:0;z-index:110;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
 #quiz-overlay.visible{display:flex}
-/* Alarm still ringing indicator inside quiz */
-.quiz-alarm-bar{
-  background:rgba(239,83,80,.1);border-bottom:1px solid rgba(239,83,80,.25);
-  padding:6px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;
-}
+.quiz-alarm-bar{background:rgba(239,83,80,.1);border-bottom:1px solid rgba(239,83,80,.25);padding:6px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .quiz-alarm-bar-dot{width:7px;height:7px;border-radius:50%;background:#EF5350;animation:blink .7s ease-in-out infinite;flex-shrink:0}
 .quiz-alarm-bar-text{font-size:11px;font-weight:800;color:#EF5350;flex:1}
 .quiz-alarm-bar-count{font-size:11px;font-weight:900;color:var(--primary)}
@@ -224,14 +205,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 .results-emoji{font-size:60px;margin-bottom:14px;display:block}
 .results-title{font-size:26px;font-weight:900;color:var(--text);margin-bottom:6px}
 .results-sub{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
-/* Alarm still ringing badge on results — user must stop it */
-.alarm-still-ringing{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:10px 18px;margin:0 auto 16px;
-  background:rgba(239,83,80,.12);border:2px solid #EF5350;
-  border-radius:12px;width:100%;
-  animation:ringPulse .9s ease-in-out infinite;
-}
+.alarm-still-ringing{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;margin:0 auto 16px;background:rgba(239,83,80,.12);border:2px solid #EF5350;border-radius:12px;width:100%;animation:ringPulse .9s ease-in-out infinite}
 @keyframes ringPulse{0%,100%{border-color:#EF5350;box-shadow:0 0 0 0 rgba(239,83,80,.4)}50%{border-color:#EF5350;box-shadow:0 0 0 8px rgba(239,83,80,0)}}
 .alarm-still-ringing-text{font-size:13px;font-weight:800;color:#EF5350}
 .score-circle{width:100px;height:100px;border-radius:50%;background:var(--pgrad);padding:4px;margin:0 auto 20px}
@@ -244,7 +218,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 .stat-label{font-size:9px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 .stat-correct .stat-num{color:var(--green)}
 .stat-wrong .stat-num{color:var(--red)}
-/* The ONLY way to stop the alarm */
 .btn-stop-alarm{width:100%;padding:18px;border-radius:var(--radius);background:linear-gradient(135deg,#b71c1c,#EF5350);color:white;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(239,83,80,.5);transition:all .2s;animation:btnPulse 1s ease-in-out infinite}
 .btn-stop-alarm:active{transform:scale(.97)}
 /* ── DAILY TAB ───────────────────────────────────────────── */
@@ -308,6 +281,29 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 .install-sub{font-size:10px;color:var(--text2);margin-top:2px;line-height:1.4}
 .install-btn{padding:8px 14px;background:var(--pgrad);border-radius:16px;font-size:11px;font-weight:800;color:white;cursor:pointer;white-space:nowrap;flex-shrink:0;border:none;font-family:'Nunito',sans-serif;transition:transform .15s}
 .install-btn:active{transform:scale(.94)}
+/* SW status indicator */
+.sw-status{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px}
+.sw-status.alive{color:#4CAF50;background:rgba(76,175,80,.1)}
+.sw-status.dead{color:#EF5350;background:rgba(239,83,80,.1)}
+/* Battery instruction card */
+.battery-card{margin:10px 14px 4px;border-radius:var(--radius);overflow:hidden;border:2px solid #FF9800;box-shadow:0 4px 16px rgba(255,152,0,.2)}
+.battery-card-header{background:linear-gradient(135deg,#E65100,#FF9800);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.battery-card-header-icon{font-size:22px;flex-shrink:0}
+.battery-card-header-text{flex:1}
+.battery-card-title{font-size:13px;font-weight:900;color:#fff;letter-spacing:.3px}
+.battery-card-subtitle{font-size:10px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
+.battery-card-body{background:var(--surface);padding:12px 14px}
+.battery-os-label{font-size:9px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;padding:3px 8px;border-radius:6px;display:inline-block}
+.battery-os-android{color:#3DDC84;background:rgba(61,220,132,.12);border:1px solid rgba(61,220,132,.3)}
+.battery-os-ios{color:#64B5F6;background:rgba(100,181,246,.12);border:1px solid rgba(100,181,246,.3);margin-top:12px}
+.battery-step{display:flex;align-items:flex-start;gap:9px;margin-bottom:7px}
+.battery-step:last-child{margin-bottom:0}
+.battery-step-num{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#E65100,#FF9800);color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.battery-step-text{font-size:12px;color:var(--text2);line-height:1.5;flex:1}
+.battery-step-text strong{color:var(--text);font-weight:800}
+.battery-step-text .path{font-size:11px;color:#FF9800;font-weight:800;background:rgba(255,152,0,.1);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:2px}
+.battery-warning-strip{background:rgba(239,83,80,.08);border-top:1px solid rgba(239,83,80,.2);padding:9px 14px;display:flex;align-items:center;gap:8px}
+.battery-warning-strip-text{font-size:11px;color:#EF5350;font-weight:700;line-height:1.4}
 /* ── MODAL ───────────────────────────────────────────────── */
 .modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:flex-end}
 .modal-backdrop.visible{display:flex}
@@ -320,10 +316,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 /* ── TOAST ───────────────────────────────────────────────── */
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:400;opacity:0;transition:all .3s;white-space:nowrap;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(orientation:landscape){
-  .exam-tracker{grid-template-columns:repeat(6,1fr)}
-  #clock-display{font-size:38px}
-}
+@media(orientation:landscape){.exam-tracker{grid-template-columns:repeat(6,1fr)}#clock-display{font-size:38px}}
 @media(min-width:480px){.fab{right:calc(50% - 196px)}.fab:active{transform:scale(.9)}}
 </style>
 </head>
@@ -436,7 +429,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
   <div id="content-settings" class="scroll-area">
     <div class="install-banner" id="install-banner">
       <div style="font-size:26px">📲</div>
-      <div class="install-text"><div class="install-title">Install SSS ALARM</div><div class="install-sub">Add to home screen — runs background alarm checks</div></div>
+      <div class="install-text"><div class="install-title">Install SSS ALARM</div><div class="install-sub">Add to home screen for best alarm reliability</div></div>
       <button class="install-btn" onclick="triggerInstall()">Install</button>
     </div>
     <div style="height:10px"></div>
@@ -450,11 +443,97 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
       <div class="settings-row" onclick="clearDailyLogs()"><span class="settings-icon">🗑️</span><div class="settings-info"><div class="settings-name">Clear Daily Logs</div><div class="settings-value">Delete all study records</div></div><span class="settings-arrow">›</span></div>
     </div>
     <div class="settings-card">
-      <div class="settings-row"><span class="settings-icon">🔔</span><div class="settings-info"><div class="settings-name">Alarm behaviour</div><div class="settings-value">Tone rings from alarm time → stops only after ALL MCQs answered</div></div></div>
-      <div class="settings-row"><span class="settings-icon">📱</span><div class="settings-info"><div class="settings-name">Volume tip</div><div class="settings-value">Set your Media Volume to MAX — web apps use media stream (not alarm stream)</div></div></div>
-      <div class="settings-row"><span class="settings-icon">ℹ️</span><div class="settings-info"><div class="settings-name">SSS ALARM v3.0</div><div class="settings-value">NEET PG • INICET • FMGE • UPSC CMS</div></div></div>
+      <div class="settings-row"><span class="settings-icon">🔔</span><div class="settings-info"><div class="settings-name">Background alarm</div><div class="settings-value">SW keepalive pings every 25s — keeps alarm checker alive</div><div id="sw-status-el" class="sw-status">checking...</div></div></div>
+      <div class="settings-row"><span class="settings-icon">📱</span><div class="settings-info"><div class="settings-name">Volume tip</div><div class="settings-value">Set Media Volume to MAX — web apps use media stream, not alarm stream</div></div></div>
+      <div class="settings-row"><span class="settings-icon">ℹ️</span><div class="settings-info"><div class="settings-name">SSS ALARM v3.1</div><div class="settings-value">NEET PG • INICET • FMGE • UPSC CMS</div></div></div>
     </div>
-    <div style="height:20px"></div>
+
+    <!-- ── BATTERY INSTRUCTION CARD ───────────────── -->
+    <div class="battery-card">
+      <div class="battery-card-header">
+        <div class="battery-card-header-icon">🔋</div>
+        <div class="battery-card-header-text">
+          <div class="battery-card-title">Critical: Allow Background Activity</div>
+          <div class="battery-card-subtitle">Without this, Android kills the alarm when screen is off</div>
+        </div>
+      </div>
+      <div class="battery-card-body">
+
+        <span class="battery-os-label battery-os-android">🤖 Android (Chrome)</span>
+        <div class="battery-step">
+          <div class="battery-step-num">1</div>
+          <div class="battery-step-text">Open your phone <strong>Settings</strong> app</div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">2</div>
+          <div class="battery-step-text">
+            Go to <strong>Apps</strong> (or App Management)<br>
+            <span class="path">Settings → Apps → See All Apps</span>
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">3</div>
+          <div class="battery-step-text">
+            Find and tap <strong>Chrome</strong>
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">4</div>
+          <div class="battery-step-text">
+            Tap <strong>Battery</strong> (or Battery &amp; data saver)<br>
+            <span class="path">Chrome → Battery</span>
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">5</div>
+          <div class="battery-step-text">
+            Select <strong>Unrestricted</strong> — this stops Android from killing Chrome in the background
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">6</div>
+          <div class="battery-step-text">
+            Also check <strong>Notifications → SSS ALARM</strong> and make sure they are <strong>Allowed</strong>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);margin:12px 0"></div>
+        <span class="battery-os-label battery-os-ios">🍎 iPhone (Safari)</span>
+        <div class="battery-step">
+          <div class="battery-step-num">1</div>
+          <div class="battery-step-text">
+            Make sure you added app via <strong>Safari → Share → Add to Home Screen</strong>
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">2</div>
+          <div class="battery-step-text">
+            Go to <strong>Settings → Screen Time → Always Allowed</strong> → add <strong>Safari</strong>
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">3</div>
+          <div class="battery-step-text">
+            Keep app <strong>open in background</strong> — do not swipe it away from the app switcher
+          </div>
+        </div>
+        <div class="battery-step">
+          <div class="battery-step-num">4</div>
+          <div class="battery-step-text">
+            Enable <strong>Settings → Notifications → Safari → Allow Notifications</strong>
+          </div>
+        </div>
+
+      </div>
+      <div class="battery-warning-strip">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div class="battery-warning-strip-text">
+          Without Unrestricted battery on Android, alarms <strong>will be skipped</strong> when the screen turns off — no matter what the app does.
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
   </div>
 
   <div class="fab" id="fab" onclick="openAddDrawer()">＋</div>
@@ -491,7 +570,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
         <div class="chip" data-val="5">5</div><div class="chip selected" data-val="15">15</div>
         <div class="chip" data-val="20">20</div><div class="chip" data-val="30">30</div>
       </div></div>
-    <div class="form-group"><label class="form-label">Alarm Sound (rings from alarm time until MCQs done)</label>
+    <div class="form-group"><label class="form-label">Alarm Sound</label>
       <div class="ringtone-list" id="ringtone-list">
         <div class="ringtone-item selected" data-sound="beep"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Hospital Beep</div><div class="ringtone-desc">Classic monitor beep pattern</div></div><span class="ringtone-play" onclick="previewSound('beep',event)">▶️</span></div>
         <div class="ringtone-item" data-sound="siren"><div class="ringtone-dot"></div><div class="ringtone-info"><div class="ringtone-name">Code Blue Siren</div><div class="ringtone-desc">Ascending urgent siren</div></div><span class="ringtone-play" onclick="previewSound('siren',event)">▶️</span><span class="ringtone-volume">LOUD</span></div>
@@ -506,11 +585,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
   <div style="height:8px"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     ALARM OVERLAY
-     Audio starts HERE → runs through ALL MCQs
-     Only stops when user taps "Stop Alarm" on results screen
-════════════════════════════════════════════════════════ -->
+<!-- ── ALARM OVERLAY ──────────────────────────────── -->
 <div id="alarm-overlay">
   <div class="alarm-overlay-content">
     <div class="alarm-logo-wrap">
@@ -533,13 +608,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
       <button class="btn-dismiss" onclick="startQuiz()">📝 Answer <span id="alarm-q-count">15</span> MCQs to Stop Alarm</button>
       <div class="no-snooze-warning">🚫 No snooze — the only way out is through the MCQs</div>
     </div>
-    <div class="volume-note" id="volume-note-bar">🔊 If alarm is quiet: go to Settings → turn Media Volume to MAX</div>
+    <div class="volume-note">🔊 If quiet: Settings → Media Volume → MAX</div>
   </div>
 </div>
 
 <!-- ── QUIZ OVERLAY ────────────────────────────────── -->
 <div id="quiz-overlay">
-  <!-- Alarm still ringing bar during quiz -->
   <div class="quiz-alarm-bar">
     <div class="quiz-alarm-bar-dot"></div>
     <div class="quiz-alarm-bar-text">🔊 Alarm ringing — complete all MCQs to stop it</div>
@@ -558,13 +632,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
   </div>
 </div>
 
-<!-- ── RESULTS — alarm stops HERE ─────────────────── -->
+<!-- ── RESULTS ─────────────────────────────────────── -->
 <div id="results-overlay">
   <div class="results-content">
     <span class="results-emoji" id="results-emoji">🎉</span>
     <div class="results-title" id="results-title">All Done!</div>
     <div class="results-sub" id="results-sub"></div>
-    <!-- Alarm is still ringing — user must tap to stop -->
     <div class="alarm-still-ringing">
       <div class="alarm-ringing-dot" style="background:#EF5350"></div>
       <div class="alarm-still-ringing-text">🔊 Alarm still ringing — tap below to stop!</div>
@@ -578,7 +651,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
       <div class="stat-box stat-wrong"><div class="stat-num" id="stat-wrong">0</div><div class="stat-label">Wrong</div></div>
       <div class="stat-box"><div class="stat-num" id="stat-pct" style="color:var(--primary)">0%</div><div class="stat-label">Score</div></div>
     </div>
-    <!-- THE ONLY BUTTON THAT STOPS THE ALARM -->
     <button class="btn-stop-alarm" onclick="dismissAlarmFinal()">🛑 Stop Alarm & Start My Day</button>
   </div>
 </div>
@@ -600,13 +672,14 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
     <div class="install-step"><div class="step-num">1</div><div class="step-text">Open in <strong>Chrome</strong></div></div>
     <div class="install-step"><div class="step-num">2</div><div class="step-text">Tap <strong>⋮ menu → "Add to Home screen"</strong></div></div>
     <div class="install-step"><div class="step-num">3</div><div class="step-text">Tap <strong>Install</strong> — icon appears as <strong>SSS ALARM</strong></div></div>
+    <div class="install-step"><div class="step-num">4</div><div class="step-text">Go to <strong>Settings → Apps → Chrome → Battery → Unrestricted</strong></div></div>
     <div style="font-size:12px;font-weight:800;color:var(--primary);margin:12px 0 4px">iPhone Safari</div>
     <div class="install-step"><div class="step-num">1</div><div class="step-text">Open in <strong>Safari</strong> (not Chrome)</div></div>
     <div class="install-step"><div class="step-num">2</div><div class="step-text">Tap <strong>Share ⬆️ → "Add to Home Screen"</strong></div></div>
     <div class="install-step"><div class="step-num">3</div><div class="step-text">Name it <strong>SSS ALARM</strong> → tap <strong>Add</strong></div></div>
     <div style="background:rgba(255,167,38,.1);border:1px solid rgba(255,167,38,.3);border-radius:10px;padding:10px;margin-top:10px">
-      <div style="font-size:11px;font-weight:800;color:#FFA726;margin-bottom:3px">⚠️ For background alarms</div>
-      <div style="font-size:11px;color:var(--text2);line-height:1.6">Grant <strong>Notification</strong> permission when asked. On Android, also grant <strong>Background Activity</strong>. Keep <strong>Media Volume at MAX</strong> — PWA uses media stream (not alarm stream).</div>
+      <div style="font-size:11px;font-weight:800;color:#FFA726;margin-bottom:3px">⚠️ Critical for background alarms</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.6">Keep app <strong>open in background</strong> (don't force-close). Grant <strong>Notification</strong> permission. Keep <strong>Media Volume at MAX</strong>.</div>
     </div>
     <button class="btn-primary" id="modal-install-btn" style="margin-top:14px;display:none" onclick="triggerInstall()">📲 Install Now</button>
   </div>
@@ -616,19 +689,18 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;hei
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  SSS ALARM v3.0
+//  SSS ALARM v3.1  — KEEPALIVE-BASED SW ARCHITECTURE
+//
 //  ALARM FLOW:
-//  1. Alarm fires at scheduled time (or screen-off → SW notification)
-//  2. startAlarmAudio() fires IMMEDIATELY ← audio starts here
-//  3. startNoSleep() keeps browser active
-//  4. Alarm overlay shown (NO SNOOZE)
-//  5. User taps "Answer MCQs" → quiz starts
-//  6. Audio KEEPS PLAYING through all questions
-//  7. Results shown — audio STILL PLAYING
-//  8. User taps "Stop Alarm" → stopAlarmAudio() ← ONLY stop point
+//  1. Page pings SW every 25s (KEEPALIVE) → SW wakes → checks alarms
+//  2. When alarm time matches → SW shows notification + messages page
+//  3. Page fires alarm audio immediately on FIRE_ALARM_AUDIO message
+//  4. Alarm overlay shown → user taps "Answer MCQs"
+//  5. Audio plays continuously through all quiz questions
+//  6. Results shown → user taps "Stop Alarm" → audio stops
 // ═══════════════════════════════════════════════════════════
 
-// ── FIX: Inject inline manifest ──────────────────────────
+// ── INLINE MANIFEST ───────────────────────────────────────
 (function(){
   const ICON = 'https://raw.githubusercontent.com/scalpelstudysquad/scapel-study-squad-alarm/8d2a88640a7eee2cc66beaaa226566f9fdb3e5f5/icon-512.png';
   const m = {
@@ -693,41 +765,43 @@ function updateExamTracker(){
 }
 
 // ── STATE ─────────────────────────────────────────────────
-let alarms     = JSON.parse(localStorage.getItem('scalpel_alarms')||'[]');
-let questions  = [];
-let quizQueue  = [];
-let currentQIdx= 0;
-let correctCount=0;
-let activeAlarm= null;
-let customMusicData=null;
-let selectedSound='beep';
-let selectedExams=['ALL'];
-let selectedDays=[1,2,3,4,5];
-let selectedQCount=15;
-let alarmCheckInterval=null;
-let audioCtx=null;
-let alarmNodes=[];
-let noSleepSource=null;
-let wakeLock=null;
-let deferredInstallPrompt=null;
-let editingAlarmId=null;
-let swRegistration=null;
+let alarms      = JSON.parse(localStorage.getItem('scalpel_alarms')||'[]');
+let questions   = [];
+let quizQueue   = [];
+let currentQIdx = 0;
+let correctCount= 0;
+let activeAlarm = null;
+let customMusicData = null;
+let selectedSound   = 'beep';
+let selectedExams   = ['ALL'];
+let selectedDays    = [1,2,3,4,5];
+let selectedQCount  = 15;
+let alarmCheckInterval = null;
+let audioCtx    = null;
+let alarmNodes  = [];
+let noSleepSource = null;
+let wakeLock    = null;
+let deferredInstallPrompt = null;
+let editingAlarmId = null;
+let swRegistration = null;
+let swKeepaliveInterval = null;
+let swLastAck   = 0;
 
 // ── DAILY STATE ───────────────────────────────────────────
-const DAILY_KEY='scalpel_daily_logs';
-let timerInterval=null;
-let dailyMode='idle';
-let dailyTimeLeft=0;
-let dailyInitDuration=0;
-let dailyElapsed=0;
-let dailyIsPaused=false;
-let dailyActiveSub='';
-let dailyActivePhase='';
-let dailyIsSkipped=false;
-let currentViewDate=new Date();
-let hChart=null,mChart=null;
-const SUBJECTS_19=["Anatomy","Physiology","Biochemistry","Pathology","Microbiology","Pharmacology","FMT","PSM","Ophthalmology","ENT","Medicine","Surgery","OBG","Pediatrics","Anaesthesia","Dermatology","Orthopedics","Psychiatry","Radiology"];
-const QUOTES=["The art of medicine consists of amusing the patient while nature cures the disease.","Wherever the art of medicine is loved, there is also a love of humanity.","The good physician treats the disease; the great physician treats the patient.","Medicine is a science of uncertainty and an art of probability.","Dream big, study hard, stay focused — the MBBS was just the beginning.","Your future patients are counting on you. Wake up!","PG seat is calling your name. Answer it.","NEET PG is a marathon. Lace up.","Every master was once a disaster.","You don't have to be great to start, but you have to start to be great."];
+const DAILY_KEY = 'scalpel_daily_logs';
+let timerInterval = null;
+let dailyMode = 'idle';
+let dailyTimeLeft = 0;
+let dailyInitDuration = 0;
+let dailyElapsed = 0;
+let dailyIsPaused = false;
+let dailyActiveSub = '';
+let dailyActivePhase = '';
+let dailyIsSkipped = false;
+let currentViewDate = new Date();
+let hChart = null, mChart = null;
+const SUBJECTS_19 = ["Anatomy","Physiology","Biochemistry","Pathology","Microbiology","Pharmacology","FMT","PSM","Ophthalmology","ENT","Medicine","Surgery","OBG","Pediatrics","Anaesthesia","Dermatology","Orthopedics","Psychiatry","Radiology"];
+const QUOTES = ["The art of medicine consists of amusing the patient while nature cures the disease.","Wherever the art of medicine is loved, there is also a love of humanity.","The good physician treats the disease; the great physician treats the patient.","Medicine is a science of uncertainty and an art of probability.","Dream big, study hard, stay focused — the MBBS was just the beginning.","Your future patients are counting on you. Wake up!","PG seat is calling your name. Answer it.","NEET PG is a marathon. Lace up.","Every master was once a disaster.","You don't have to be great to start, but you have to start to be great."];
 
 // ── INIT ──────────────────────────────────────────────────
 window.addEventListener('load', async ()=>{
@@ -735,11 +809,11 @@ window.addEventListener('load', async ()=>{
   updateExamTracker();
   setInterval(updateExamTracker, 60000);
   renderAlarms();
-  startAlarmChecker();
+  startPageAlarmChecker();   // page-side backup checker (15s)
   loadQuestions();
   requestNotificationPermission();
   setupVolSlider();
-  initServiceWorker();
+  initServiceWorker();       // SW + keepalive
   updateQBankInfo();
   renderDailyUI();
   checkURLParams();
@@ -747,83 +821,167 @@ window.addEventListener('load', async ()=>{
 
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault();
-  deferredInstallPrompt=e;
+  deferredInstallPrompt = e;
   document.getElementById('header-install-btn').classList.add('show');
   document.getElementById('install-banner').classList.add('visible');
-  document.getElementById('modal-install-btn').style.display='block';
+  document.getElementById('modal-install-btn').style.display = 'block';
 });
 
-window.addEventListener('appinstalled',()=>{
-  deferredInstallPrompt=null;
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
   document.getElementById('header-install-btn').classList.remove('show');
   document.getElementById('install-banner').classList.remove('visible');
   showToast('🎉 SSS ALARM installed!');
 });
 
-// Unlock audio on first user interaction
+// Unlock audio on first interaction
 document.addEventListener('touchstart', unlockAudio, {once:true});
 document.addEventListener('click', unlockAudio, {once:true});
+function unlockAudio(){ getAudioCtx(); }
 
-function unlockAudio(){
-  getAudioCtx(); // creates context, resumes if suspended
-}
+// ═══════════════════════════════════════════════════════════
+//  SERVICE WORKER + KEEPALIVE
+//
+//  WHY KEEPALIVE:
+//  Android kills the SW after ~30s of idle. setInterval inside SW
+//  never fires reliably. Instead, the PAGE pings the SW every 25s.
+//  Each ping: SW wakes → checkAlarms() runs → SW responds → sleeps.
+//  This chain keeps alarm detection alive as long as the tab is open.
+// ═══════════════════════════════════════════════════════════
 
-// ── SERVICE WORKER ────────────────────────────────────────
 async function initServiceWorker(){
   if(!('serviceWorker' in navigator)) return;
   try {
     swRegistration = await navigator.serviceWorker.register('./sw.js');
     console.log('[App] SW registered');
 
-    // Send alarms to SW for background checking
+    // Wait for SW to be active before messaging
+    await waitForSWActive(swRegistration);
+
+    // Send current alarms to SW cache
     sendAlarmsToSW();
 
-    // Request periodic background sync permission
-    swRegistration.active?.postMessage({type:'REGISTER_PERIODIC_SYNC'});
+    // Register Periodic Background Sync FROM PAGE (not SW — navigator not in SW)
+    await registerPeriodicSyncFromPage(swRegistration);
+
+    // Start keepalive ping loop
+    startSWKeepalive();
+
+    // Restart keepalive and re-sync when tab regains focus
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.visibilityState === 'visible'){
+        startSWKeepalive();
+        sendAlarmsToSW();
+      }
+    });
 
     // Listen for messages from SW
     navigator.serviceWorker.addEventListener('message', handleSWMessage);
 
+    updateSWStatusIndicator(true);
+
   } catch(e){
     console.warn('[App] SW registration failed:', e.message);
+    updateSWStatusIndicator(false);
   }
 }
 
-function handleSWMessage(event){
-  const msg = event.data || {};
-  if(msg.type === 'FIRE_ALARM_AUDIO'){
-    // SW detected alarm while screen was off → fire with audio now
-    if(!activeAlarm){
-      fireAlarm(msg.alarm);
-    }
-  }
-}
-
-function sendAlarmsToSW(){
-  if(!navigator.serviceWorker?.controller) return;
-  navigator.serviceWorker.controller.postMessage({
-    type: 'UPDATE_ALARMS',
-    alarms: alarms
+// Wait until SW controller is active
+function waitForSWActive(registration){
+  return new Promise(resolve=>{
+    if(registration.active){ resolve(); return; }
+    const sw = registration.installing || registration.waiting;
+    if(!sw){ resolve(); return; }
+    sw.addEventListener('statechange', function h(){
+      if(sw.state === 'activated'){ sw.removeEventListener('statechange', h); resolve(); }
+    });
   });
 }
 
-// ── CHECK URL PARAMS (from notification click) ────────────
+// ── KEEPALIVE: ping SW every 25s ─────────────────────────
+// Each ping wakes the SW just before Android would kill it (~30s)
+// SW runs checkAlarms() on each ping
+function startSWKeepalive(){
+  if(swKeepaliveInterval) clearInterval(swKeepaliveInterval);
+  pingSW(); // immediate ping on start
+  swKeepaliveInterval = setInterval(pingSW, 25000);
+}
+
+function pingSW(){
+  if(!navigator.serviceWorker?.controller) return;
+  navigator.serviceWorker.controller.postMessage({ type: 'KEEPALIVE' });
+}
+
+// ── Handle SW → Page messages ─────────────────────────────
+function handleSWMessage(event){
+  const msg = event.data || {};
+
+  if(msg.type === 'FIRE_ALARM_AUDIO'){
+    // SW detected alarm time match and messaged us
+    if(!activeAlarm) fireAlarm(msg.alarm);
+    return;
+  }
+
+  if(msg.type === 'KEEPALIVE_ACK'){
+    swLastAck = Date.now();
+    updateSWStatusIndicator(true);
+    return;
+  }
+}
+
+// ── Send alarms to SW ─────────────────────────────────────
+function sendAlarmsToSW(){
+  const ctrl = navigator.serviceWorker?.controller;
+  if(!ctrl){
+    setTimeout(sendAlarmsToSW, 1000); // retry until controller ready
+    return;
+  }
+  ctrl.postMessage({ type: 'UPDATE_ALARMS', alarms });
+}
+
+// ── Periodic Background Sync (Chrome Android) ─────────────
+// MUST be called from page — navigator.permissions not in SW
+async function registerPeriodicSyncFromPage(registration){
+  try {
+    if(!registration.periodicSync) return;
+    const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+    if(status.state === 'granted'){
+      await registration.periodicSync.register('sss-alarm-check', { minInterval: 60000 });
+      console.log('[App] Periodic Background Sync registered ✓');
+    }
+  } catch(e){
+    console.log('[App] Periodic sync unavailable:', e.message);
+  }
+}
+
+// ── SW health indicator ───────────────────────────────────
+function updateSWStatusIndicator(alive){
+  const el = document.getElementById('sw-status-el');
+  if(!el) return;
+  el.textContent = alive ? '✓ SW alive — alarm checker running' : '⚠ SW inactive — alarm may miss';
+  el.className = 'sw-status ' + (alive ? 'alive' : 'dead');
+}
+
+// Degrade indicator if no ACK for 40s
+setInterval(()=>{
+  if(swLastAck && Date.now() - swLastAck > 40000) updateSWStatusIndicator(false);
+}, 10000);
+
+// ── CHECK URL PARAMS (notification click) ─────────────────
 function checkURLParams(){
   const params = new URLSearchParams(window.location.search);
-  if(params.get('alarm')==='true'){
+  if(params.get('alarm') === 'true'){
     const id = params.get('id');
     const alarm = id ? alarms.find(a=>a.id===id) : null;
-    if(alarm && !activeAlarm){
-      setTimeout(()=>fireAlarm(alarm), 800);
-    }
+    if(alarm && !activeAlarm) setTimeout(()=>fireAlarm(alarm), 800);
   }
 }
 
 // ── CLOCK ─────────────────────────────────────────────────
-function initClock(){updateClock();setInterval(updateClock,1000);}
+function initClock(){ updateClock(); setInterval(updateClock, 1000); }
 function updateClock(){
-  const now=new Date();
-  const h24=now.getHours(),m=String(now.getMinutes()).padStart(2,'0');
+  const now = new Date();
+  const h24=now.getHours(), m=String(now.getMinutes()).padStart(2,'0');
   const ampm=h24>=12?'PM':'AM', h12=h24%12||12;
   document.getElementById('clock-display').textContent=`${String(h12).padStart(2,'0')}:${m} ${ampm}`;
   const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -832,7 +990,7 @@ function updateClock(){
 }
 
 // ── TIME PICKER ───────────────────────────────────────────
-function openTimePicker(){const i=document.getElementById('time-input');if(i.showPicker)i.showPicker();else i.click();}
+function openTimePicker(){ const i=document.getElementById('time-input'); if(i.showPicker)i.showPicker();else i.click(); }
 function syncTimeDisplay(){
   const val=document.getElementById('time-input').value; if(!val)return;
   const[h24,m]=val.split(':').map(Number);
@@ -853,7 +1011,7 @@ function openAddDrawer(){
   document.getElementById('time-display').textContent='06:00';
   document.getElementById('time-ampm-label').textContent='AM';
   document.getElementById('alarm-label-input').value='';
-  selectedExams=['ALL'];selectedDays=[1,2,3,4,5];selectedQCount=15;selectedSound='beep';
+  selectedExams=['ALL']; selectedDays=[1,2,3,4,5]; selectedQCount=15; selectedSound='beep';
   refreshChips('exam-chips','data-val',['ALL']);
   refreshChips2('day-chips','data-day',[1,2,3,4,5]);
   refreshChips('q-count-chips','data-val',['15']);
@@ -888,11 +1046,11 @@ document.querySelectorAll('#q-count-chips .chip').forEach(c=>c.addEventListener(
 }));
 document.querySelectorAll('#ringtone-list .ringtone-item').forEach(item=>item.addEventListener('click',()=>{
   if(item.dataset.sound==='custom')return;
-  selectedSound=item.dataset.sound;updateRingtoneSel(selectedSound);
+  selectedSound=item.dataset.sound; updateRingtoneSel(selectedSound);
 }));
-function refreshChips(pid,attr,vals){document.querySelectorAll(`#${pid} .chip`).forEach(c=>c.classList.toggle('selected',vals.includes(c.getAttribute(attr))));}
-function refreshChips2(pid,attr,vals){document.querySelectorAll(`#${pid} .chip`).forEach(c=>c.classList.toggle('selected',vals.includes(parseInt(c.getAttribute(attr)))));}
-function updateRingtoneSel(s){document.querySelectorAll('.ringtone-item').forEach(r=>r.classList.toggle('selected',r.dataset.sound===s));}
+function refreshChips(pid,attr,vals){ document.querySelectorAll(`#${pid} .chip`).forEach(c=>c.classList.toggle('selected',vals.includes(c.getAttribute(attr)))); }
+function refreshChips2(pid,attr,vals){ document.querySelectorAll(`#${pid} .chip`).forEach(c=>c.classList.toggle('selected',vals.includes(parseInt(c.getAttribute(attr))))); }
+function updateRingtoneSel(s){ document.querySelectorAll('.ringtone-item').forEach(r=>r.classList.toggle('selected',r.dataset.sound===s)); }
 
 // ── SAVE / EDIT ALARM ─────────────────────────────────────
 function saveAlarm(){
@@ -908,11 +1066,11 @@ function saveAlarm(){
     alarms.push({id:Date.now().toString(),time,label,exams:[...selectedExams],days:[...selectedDays],qCount:selectedQCount,sound:selectedSound,volume,enabled:true,customAudio:selectedSound==='custom'?customMusicData:null,createdAt:new Date().toISOString()});
     showToast('⏰ Alarm set for '+formatTime12(time));
   }
-  persistAlarms();renderAlarms();closeAddDrawer();sendAlarmsToSW();
+  persistAlarms(); renderAlarms(); closeAddDrawer(); sendAlarmsToSW();
 }
-function persistAlarms(){localStorage.setItem('scalpel_alarms',JSON.stringify(alarms.map(a=>({...a,customAudio:null}))));}
-function toggleAlarm(id){const a=alarms.find(a=>a.id===id);if(a){a.enabled=!a.enabled;persistAlarms();renderAlarms();sendAlarmsToSW();showToast(a.enabled?'✅ Enabled':'🔕 Disabled');}}
-function deleteAlarm(id){alarms=alarms.filter(a=>a.id!==id);persistAlarms();renderAlarms();sendAlarmsToSW();showToast('🗑️ Deleted');}
+function persistAlarms(){ localStorage.setItem('scalpel_alarms',JSON.stringify(alarms.map(a=>({...a,customAudio:null})))); }
+function toggleAlarm(id){ const a=alarms.find(a=>a.id===id);if(a){a.enabled=!a.enabled;persistAlarms();renderAlarms();sendAlarmsToSW();showToast(a.enabled?'✅ Enabled':'🔕 Disabled');} }
+function deleteAlarm(id){ alarms=alarms.filter(a=>a.id!==id);persistAlarms();renderAlarms();sendAlarmsToSW();showToast('🗑️ Deleted'); }
 function editAlarm(id){
   const alarm=alarms.find(a=>a.id===id);if(!alarm)return;
   editingAlarmId=id;
@@ -926,8 +1084,8 @@ function editAlarm(id){
   document.getElementById('volume-slider').value=Math.round(alarm.volume*100);
   document.getElementById('vol-display').textContent=Math.round(alarm.volume*100);
   document.getElementById('volume-slider').style.setProperty('--val',Math.round(alarm.volume*100)+'%');
-  selectedExams=alarm.exams||['ALL'];selectedDays=alarm.days||[1,2,3,4,5];
-  selectedQCount=alarm.qCount||15;selectedSound=alarm.sound||'beep';
+  selectedExams=alarm.exams||['ALL']; selectedDays=alarm.days||[1,2,3,4,5];
+  selectedQCount=alarm.qCount||15; selectedSound=alarm.sound||'beep';
   refreshChips('exam-chips','data-val',selectedExams);
   refreshChips2('day-chips','data-day',selectedDays);
   refreshChips('q-count-chips','data-val',[selectedQCount.toString()]);
@@ -944,7 +1102,7 @@ function clearAllAlarms(){
 function renderAlarms(){
   const list=document.getElementById('alarm-list');
   if(!alarms.length){
-    list.innerHTML=`<div class="empty-state"><div class="empty-icon">⏰</div><div class="empty-title">No Alarms Set</div><div class="empty-sub">Tap + to set your first alarm.<br>🔊 Tone rings from alarm time → only stops after ALL MCQs answered.</div></div>`;return;
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">⏰</div><div class="empty-title">No Alarms Set</div><div class="empty-sub">Tap + to set your first alarm.<br>🔊 Tone rings from alarm time → stops only after ALL MCQs answered.</div></div>`;return;
   }
   const sorted=[...alarms].sort((a,b)=>a.time.localeCompare(b.time));
   list.innerHTML='';
@@ -973,42 +1131,40 @@ function getDaysStr(days){
   if(JSON.stringify([...days].sort((a,b)=>a-b))==='[0,6]')return'Weekends';
   return days.map(d=>['Su','Mo','Tu','We','Th','Fr','Sa'][d]).join(' ');
 }
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── ALARM CHECKER (page-side) ─────────────────────────────
-function startAlarmChecker(){
-  if(alarmCheckInterval)clearInterval(alarmCheckInterval);
-  alarmCheckInterval=setInterval(checkAlarms,15000);
-  checkAlarms();
+// ── PAGE-SIDE ALARM CHECKER (backup, when tab is visible) ─
+function startPageAlarmChecker(){
+  if(alarmCheckInterval) clearInterval(alarmCheckInterval);
+  alarmCheckInterval = setInterval(pageCheckAlarms, 15000);
+  pageCheckAlarms();
 }
-function checkAlarms(){
-  if(activeAlarm)return;
+function pageCheckAlarms(){
+  if(activeAlarm) return;
   const now=new Date();
   const ct=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const cd=now.getDay();
   for(const alarm of alarms){
-    if(!alarm.enabled)continue;
-    if(alarm.time!==ct)continue;
-    if(alarm.days&&alarm.days.length>0&&!alarm.days.includes(cd))continue;
+    if(!alarm.enabled) continue;
+    if(alarm.time!==ct) continue;
+    if(alarm.days&&alarm.days.length>0&&!alarm.days.includes(cd)) continue;
     const key=`fired_${alarm.id}_${now.toDateString()}_${ct}`;
-    if(localStorage.getItem(key))continue;
+    if(localStorage.getItem(key)) continue;
     localStorage.setItem(key,'1');
-    fireAlarm(alarm);break;
+    fireAlarm(alarm); break;
   }
 }
 
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 //  FIRE ALARM
-//  Audio starts HERE — runs continuously until dismissAlarmFinal()
-// ══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 function fireAlarm(alarm){
-  if(activeAlarm)return; // prevent double-fire
-  activeAlarm=alarm;
+  if(activeAlarm) return;
+  activeAlarm = alarm;
   requestWakeLock();
   startNoSleep();
   lockNavigation();
 
-  // ── SHOW OVERLAY ──────────────────────────────────────
   document.getElementById('alarm-now-time').textContent=formatTime12(alarm.time);
   document.getElementById('alarm-title-label').textContent=alarm.label;
   document.getElementById('alarm-exam-label').textContent=(alarm.exams||['ALL']).join(' · ');
@@ -1016,39 +1172,31 @@ function fireAlarm(alarm){
   document.getElementById('alarm-motivational').textContent=`"${QUOTES[Math.floor(Math.random()*QUOTES.length)]}"`;
   document.getElementById('alarm-overlay').classList.add('visible');
 
-  // ── START ALARM AUDIO IMMEDIATELY ─────────────────────
-  // Audio runs from THIS POINT through all MCQs
-  // Only stops in dismissAlarmFinal()
   startAlarmAudio(alarm);
 
-  // Vibrate device
   if('vibrate' in navigator){
     navigator.vibrate([800,200,800,200,800,400,400,200,400,200,400,400,800,200,800,200,800]);
-    // Keep vibrating every 5 seconds
     window._alarmVibrateInterval = setInterval(()=>{
       if(activeAlarm) navigator.vibrate([500,200,500,200,1000]);
     }, 5000);
   }
 
-  // Notify SW that alarm is active (to close notification if open)
   sendNotification(alarm);
 }
 
-// ── START QUIZ — audio keeps playing ─────────────────────
+// ── START QUIZ ────────────────────────────────────────────
 function startQuiz(){
   document.getElementById('alarm-overlay').classList.remove('visible');
-  // Audio is STILL PLAYING — do not call stopAlarmAudio()
-
   const alarm=activeAlarm;
   const total=alarm?(alarm.qCount||15):15;
   const examFilter=alarm?(alarm.exams||['ALL']):['ALL'];
   let pool=questions.length>0?questions:SAMPLE_QUESTIONS;
   if(!examFilter.includes('ALL')){
     const f=pool.filter(q=>examFilter.some(e=>(q.exam||'').includes(e)));
-    if(f.length>=total)pool=f;
+    if(f.length>=total) pool=f;
   }
   quizQueue=[...pool].sort(()=>Math.random()-.5).slice(0,total);
-  currentQIdx=0;correctCount=0;
+  currentQIdx=0; correctCount=0;
   document.getElementById('q-total').textContent=total;
   document.getElementById('q-correct-live').textContent='0';
   document.getElementById('q-remaining').textContent=total;
@@ -1089,7 +1237,7 @@ function renderQuestion(){
 }
 
 function selectOption(idx){
-  if(document.getElementById('btn-next').classList.contains('active'))return;
+  if(document.getElementById('btn-next').classList.contains('active')) return;
   const q=quizQueue[currentQIdx];
   const correct=typeof q.correct==='number'?q.correct:typeof q.answer==='number'?q.answer:0;
   const items=document.querySelectorAll('.option-item');
@@ -1115,15 +1263,13 @@ function selectOption(idx){
 function nextQuestion(){
   currentQIdx++;
   document.getElementById('q-remaining').textContent=quizQueue.length-currentQIdx;
-  if(currentQIdx>=quizQueue.length)showResults();
-  else{renderQuestion();document.querySelector('.quiz-body').scrollTop=0;}
+  if(currentQIdx>=quizQueue.length) showResults();
+  else{ renderQuestion(); document.querySelector('.quiz-body').scrollTop=0; }
 }
 
-// ── SHOW RESULTS — audio STILL PLAYING ───────────────────
 function showResults(){
   document.getElementById('quiz-overlay').classList.remove('visible');
-  // Audio is STILL PLAYING — do not call stopAlarmAudio()
-  const total=quizQueue.length,pct=Math.round(correctCount/total*100);
+  const total=quizQueue.length, pct=Math.round(correctCount/total*100);
   document.getElementById('final-score').textContent=correctCount;
   document.getElementById('final-total').textContent=total;
   document.getElementById('stat-correct').textContent=correctCount;
@@ -1137,150 +1283,97 @@ function showResults(){
   document.getElementById('results-title').textContent=title;
   document.getElementById('results-sub').textContent=sub;
   document.getElementById('results-overlay').classList.add('visible');
-  // Audio still ringing — user must tap "Stop Alarm" button
 }
 
-// ══════════════════════════════════════════════════════════
-//  DISMISS ALARM FINAL
-//  THE ONLY PLACE WHERE AUDIO STOPS
-// ══════════════════════════════════════════════════════════
+// ── DISMISS ALARM — ONLY place audio stops ────────────────
 function dismissAlarmFinal(){
-  // Stop alarm audio
   stopAlarmAudio();
   stopNoSleep();
   releaseWakeLock();
   unlockNavigation();
-
-  // Clear vibrate loop
-  if(window._alarmVibrateInterval){
-    clearInterval(window._alarmVibrateInterval);
-    window._alarmVibrateInterval=null;
-  }
-  navigator.vibrate?.(0); // stop vibration
-
-  // Tell SW alarm is handled — close notification
+  if(window._alarmVibrateInterval){ clearInterval(window._alarmVibrateInterval); window._alarmVibrateInterval=null; }
+  navigator.vibrate?.(0);
   if(navigator.serviceWorker?.controller && activeAlarm){
-    navigator.serviceWorker.controller.postMessage({
-      type:'ALARM_DISMISSED',
-      alarmId:activeAlarm.id
-    });
+    navigator.serviceWorker.controller.postMessage({ type:'ALARM_DISMISSED', alarmId:activeAlarm.id });
   }
-
   document.getElementById('results-overlay').classList.remove('visible');
   activeAlarm=null;
   showToast('✅ Alarm stopped. Start your day!');
 }
 
-// ── PREVENT BACK BUTTON DURING ALARM ─────────────────────
-function lockNavigation(){
-  history.pushState({alarmActive:true},'',window.location.href);
-  window.addEventListener('popstate',_preventBack);
-}
-function _preventBack(e){
-  if(activeAlarm){
-    history.pushState({alarmActive:true},'',window.location.href);
-    showToast('⚠️ Answer all MCQs to stop the alarm!');
-  }
-}
-function unlockNavigation(){
-  window.removeEventListener('popstate',_preventBack);
-}
+// ── BACK BUTTON LOCK ──────────────────────────────────────
+function lockNavigation(){ history.pushState({alarmActive:true},'',window.location.href); window.addEventListener('popstate',_preventBack); }
+function _preventBack(){ if(activeAlarm){ history.pushState({alarmActive:true},'',window.location.href); showToast('⚠️ Answer all MCQs to stop the alarm!'); } }
+function unlockNavigation(){ window.removeEventListener('popstate',_preventBack); }
 
 // ── WAKE LOCK ─────────────────────────────────────────────
-async function requestWakeLock(){
-  if('wakeLock' in navigator){try{wakeLock=await navigator.wakeLock.request('screen');}catch(e){}}
-}
-function releaseWakeLock(){if(wakeLock){wakeLock.release();wakeLock=null;}}
-document.addEventListener('visibilitychange',async()=>{
-  if(wakeLock!==null&&document.visibilityState==='visible')await requestWakeLock();
+async function requestWakeLock(){ if('wakeLock' in navigator){try{wakeLock=await navigator.wakeLock.request('screen');}catch(e){}} }
+function releaseWakeLock(){ if(wakeLock){wakeLock.release();wakeLock=null;} }
+document.addEventListener('visibilitychange', async()=>{
+  if(wakeLock!==null && document.visibilityState==='visible') await requestWakeLock();
 });
 
-// ══════════════════════════════════════════════════════════
-//  NO-SLEEP: nearly-inaudible looping audio
-//  Keeps browser active so page JS keeps running (screen off)
-// ══════════════════════════════════════════════════════════
+// ── NO-SLEEP ──────────────────────────────────────────────
 function startNoSleep(){
-  if(noSleepSource)return;
+  if(noSleepSource) return;
   try{
     const ctx=getAudioCtx();
     const buf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
     const data=buf.getChannelData(0);
-    for(let i=0;i<data.length;i++) data[i]=0.0008*Math.sin(i*0.001); // nearly zero
+    for(let i=0;i<data.length;i++) data[i]=0.0008*Math.sin(i*0.001);
     const src=ctx.createBufferSource();
-    src.buffer=buf;src.loop=true;
-    const g=ctx.createGain();g.gain.value=0.001; // virtually silent
-    src.connect(g);g.connect(ctx.destination);
-    src.start();noSleepSource=src;
+    src.buffer=buf; src.loop=true;
+    const g=ctx.createGain(); g.gain.value=0.001;
+    src.connect(g); g.connect(ctx.destination);
+    src.start(); noSleepSource=src;
   }catch(e){}
 }
-function stopNoSleep(){
-  if(noSleepSource){try{noSleepSource.stop();}catch(e){}noSleepSource=null;}
-}
+function stopNoSleep(){ if(noSleepSource){try{noSleepSource.stop();}catch(e){}noSleepSource=null;} }
 
-// ══════════════════════════════════════════════════════════
-//  AUDIO ENGINE
-//  Uses Web Audio API — NOTE: Uses media volume (not alarm volume)
-//  Maximized with DynamicsCompressor + gain > 1.0
-//  Tell users: set Media Volume to MAX in Android settings
-// ══════════════════════════════════════════════════════════
+// ── AUDIO ENGINE ──────────────────────────────────────────
 function getAudioCtx(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended') audioCtx.resume();
   return audioCtx;
 }
-
 function startAlarmAudio(alarm){
   stopAlarmAudio();
   const vol=alarm?(alarm.volume||0.8):0.8;
   if(alarm&&alarm.sound==='custom'&&alarm.customAudio) playCustomAudio(alarm.customAudio,vol);
   else playBuiltinAlarm((alarm&&alarm.sound)||'beep',vol);
 }
-
 function playBuiltinAlarm(type,vol){
   const ctx=getAudioCtx();
-
-  // DynamicsCompressor maximizes perceived loudness
   const compressor=ctx.createDynamicsCompressor();
-  compressor.threshold.value=-6;
-  compressor.knee.value=0;
-  compressor.ratio.value=20;
-  compressor.attack.value=0.001;
-  compressor.release.value=0.05;
+  compressor.threshold.value=-6;compressor.knee.value=0;compressor.ratio.value=20;
+  compressor.attack.value=0.001;compressor.release.value=0.05;
   compressor.connect(ctx.destination);
-
-  // Master gain — boosted above 1.0 for maximum volume
   const masterGain=ctx.createGain();
-  masterGain.gain.value=Math.min(vol*3.0,3.0); // aggressive boost
+  masterGain.gain.value=Math.min(vol*3.0,3.0);
   masterGain.connect(compressor);
-
   alarmNodes=[masterGain,compressor];
-
   if(type==='beep')   scheduleBeepPattern(ctx,masterGain);
   else if(type==='siren')  scheduleSiren(ctx,masterGain);
   else if(type==='buzzer') scheduleBuzzer(ctx,masterGain);
 }
-
 function scheduleBeepPattern(ctx,gain){
   let t=ctx.currentTime;
   const loop=()=>{
-    if(!alarmNodes.includes(gain))return;
+    if(!alarmNodes.includes(gain)) return;
     [880,988,1108,0,880,988,1108,0,0].forEach((freq,i)=>{
-      if(!freq)return;
+      if(!freq) return;
       const o=ctx.createOscillator(),g2=ctx.createGain();
-      o.connect(g2);g2.connect(gain);
-      o.type='square'; // square wave = loudest/harshest
-      o.frequency.value=freq;
+      o.connect(g2);g2.connect(gain);o.type='square';o.frequency.value=freq;
       g2.gain.setValueAtTime(0.9,t+i*0.18);
       g2.gain.exponentialRampToValueAtTime(0.001,t+i*0.18+0.15);
       o.start(t+i*0.18);o.stop(t+i*0.18+0.16);
     });
-    t+=9*0.18+0.4;setTimeout(loop,(9*0.18+0.4)*1000);
+    t+=9*0.18+0.4; setTimeout(loop,(9*0.18+0.4)*1000);
   };loop();
 }
-
 function scheduleSiren(ctx,gain){
   const loop=()=>{
-    if(!alarmNodes.includes(gain))return;
+    if(!alarmNodes.includes(gain)) return;
     const o=ctx.createOscillator(),g2=ctx.createGain();
     o.connect(g2);g2.connect(gain);o.type='sawtooth';
     const now=ctx.currentTime;
@@ -1292,10 +1385,9 @@ function scheduleSiren(ctx,gain){
     setTimeout(loop,2500);
   };loop();
 }
-
 function scheduleBuzzer(ctx,gain){
   const loop=()=>{
-    if(!alarmNodes.includes(gain))return;
+    if(!alarmNodes.includes(gain)) return;
     const o=ctx.createOscillator(),g2=ctx.createGain();
     o.connect(g2);g2.connect(gain);o.type='square';o.frequency.value=440;
     const now=ctx.currentTime;
@@ -1306,13 +1398,11 @@ function scheduleBuzzer(ctx,gain){
     setTimeout(loop,1800);
   };loop();
 }
-
 function playCustomAudio(dataUrl,vol){
-  const audio=new Audio(dataUrl);audio.loop=true;audio.volume=Math.min(vol,1.0);
+  const audio=new Audio(dataUrl); audio.loop=true; audio.volume=Math.min(vol,1.0);
   audio.play().catch(()=>{});
   alarmNodes.push({isAudio:true,element:audio});
 }
-
 function stopAlarmAudio(){
   alarmNodes.forEach(n=>{
     if(n.isAudio){n.element.pause();n.element.src='';}
@@ -1320,7 +1410,6 @@ function stopAlarmAudio(){
   });
   alarmNodes=[];
 }
-
 function previewSound(type,e){
   e.stopPropagation();
   if(audioCtx?.state==='suspended') audioCtx.resume();
@@ -1334,10 +1423,9 @@ function previewSound(type,e){
   else if(type==='buzzer')scheduleBuzzer(ctx,gain);
   setTimeout(()=>stopAlarmAudio(),4000);
 }
-
-function triggerMusicUpload(e){e.stopPropagation();document.getElementById('music-upload').click();}
+function triggerMusicUpload(e){ e.stopPropagation(); document.getElementById('music-upload').click(); }
 function handleMusicUpload(event){
-  const file=event.target.files[0];if(!file)return;
+  const file=event.target.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=ev=>{customMusicData=ev.target.result;selectedSound='custom';updateRingtoneSel('custom');document.getElementById('custom-music-name').textContent=file.name;showToast('🎵 Loaded: '+file.name);};
   reader.readAsDataURL(file);
@@ -1350,28 +1438,23 @@ function testAlarmNow(){
 }
 
 // ── NOTIFICATIONS ─────────────────────────────────────────
-function requestNotificationPermission(){
-  if('Notification' in window&&Notification.permission==='default') Notification.requestPermission();
-}
+function requestNotificationPermission(){ if('Notification' in window&&Notification.permission==='default') Notification.requestPermission(); }
 function sendNotification(alarm){
   if('Notification' in window&&Notification.permission==='granted'){
     new Notification('⏰ '+alarm.label,{
       body:`🔊 Alarm ringing — open app & answer ${alarm.qCount||15} MCQs to stop`,
-      icon:'./icons/icon-192.png',
-      tag:'sss-alarm-page',
-      requireInteraction:true,
-      silent:false
+      icon:'./icons/icon-192.png', tag:'sss-alarm-page', requireInteraction:true, silent:false
     });
   }
 }
 
 // ── QUESTION BANK ─────────────────────────────────────────
 async function loadQuestions(){
-  try{const r=await fetch('questions.json');if(r.ok){const d=await r.json();questions=d.questions||[];updateQBankInfo();}}
-  catch(e){questions=[];}
+  try{ const r=await fetch('questions.json');if(r.ok){const d=await r.json();questions=d.questions||[];updateQBankInfo();} }
+  catch(e){ questions=[]; }
 }
-function updateQBankInfo(){const el=document.getElementById('qbank-info');if(el)el.textContent=questions.length>0?`${questions.length} questions loaded`:'Using built-in sample questions';}
-function showQBankInfo(){alert(`📚 Question Bank\n${questions.length>0?'Custom bank':'Built-in sample bank'}\n${questions.length>0?questions.length:SAMPLE_QUESTIONS.length} questions\n\nTo use your own: upload questions.json to your repo root.`);}
+function updateQBankInfo(){ const el=document.getElementById('qbank-info');if(el)el.textContent=questions.length>0?`${questions.length} questions loaded`:'Using built-in sample questions'; }
+function showQBankInfo(){ alert(`📚 Question Bank\n${questions.length>0?'Custom bank':'Built-in sample bank'}\n${questions.length>0?questions.length:SAMPLE_QUESTIONS.length} questions\n\nTo add your own: upload questions.json to your repo root.`); }
 
 // ── INSTALL ───────────────────────────────────────────────
 async function triggerInstall(){
@@ -1381,18 +1464,18 @@ async function triggerInstall(){
     if(outcome==='accepted'){deferredInstallPrompt=null;document.getElementById('install-banner').classList.remove('visible');document.getElementById('header-install-btn').classList.remove('show');}
   }else{showInstallModal();}
 }
-function showInstallModal(){document.getElementById('modal-install').classList.add('visible');}
-function closeModal(id){document.getElementById(id).classList.remove('visible');}
+function showInstallModal(){ document.getElementById('modal-install').classList.add('visible'); }
+function closeModal(id){ document.getElementById(id).classList.remove('visible'); }
 
 // ── DAILY TIMER ───────────────────────────────────────────
-function setupVolSlider(){const s=document.getElementById('volume-slider');s.style.setProperty('--val',s.value+'%');}
+function setupVolSlider(){ const s=document.getElementById('volume-slider');s.style.setProperty('--val',s.value+'%'); }
 function startStudyTimer(){
   const sub=document.getElementById('studySubject').value;
   if(!sub){showToast('⚠️ Select a subject first');return;}
-  if(audioCtx?.state==='suspended')audioCtx.resume();
+  if(audioCtx?.state==='suspended') audioCtx.resume();
   requestWakeLock();
-  dailyActiveSub=sub;dailyActivePhase=document.getElementById('studyPhase').value;
-  dailyMode='study';dailyIsPaused=false;dailyIsSkipped=false;
+  dailyActiveSub=sub; dailyActivePhase=document.getElementById('studyPhase').value;
+  dailyMode='study'; dailyIsPaused=false; dailyIsSkipped=false;
   const h=parseInt(document.getElementById('studyHrs').value)||0;
   const m=parseInt(document.getElementById('studyMins').value)||0;
   dailyInitDuration=h*3600+m*60;
@@ -1403,9 +1486,9 @@ function startStudyTimer(){
   document.getElementById('timer-btns-running').style.display='block';
   runDailyTimer();
 }
-function togglePause(){dailyIsPaused=!dailyIsPaused;document.getElementById('pauseBtn').textContent=dailyIsPaused?'▶ Resume':'⏸ Pause';}
-function skipStudyTimer(){clearInterval(timerInterval);if(dailyMode==='study'){dailyElapsed=dailyInitDuration-dailyTimeLeft;dailyIsSkipped=true;openMcqPopup();}else openBreakPopup();}
-function stopSession(){clearInterval(timerInterval);stopAlarmAudio();releaseWakeLock();dailyMode='idle';dailyIsPaused=false;document.getElementById('timer-display').textContent='00:00:00';document.getElementById('timer-phase-badge').textContent='';document.getElementById('timer-btns-start').style.display='block';document.getElementById('timer-btns-running').style.display='none';closeDailyPopups();}
+function togglePause(){ dailyIsPaused=!dailyIsPaused; document.getElementById('pauseBtn').textContent=dailyIsPaused?'▶ Resume':'⏸ Pause'; }
+function skipStudyTimer(){ clearInterval(timerInterval);if(dailyMode==='study'){dailyElapsed=dailyInitDuration-dailyTimeLeft;dailyIsSkipped=true;openMcqPopup();}else openBreakPopup(); }
+function stopSession(){ clearInterval(timerInterval);stopAlarmAudio();releaseWakeLock();dailyMode='idle';dailyIsPaused=false;document.getElementById('timer-display').textContent='00:00:00';document.getElementById('timer-phase-badge').textContent='';document.getElementById('timer-btns-start').style.display='block';document.getElementById('timer-btns-running').style.display='none';closeDailyPopups(); }
 function runDailyTimer(){
   clearInterval(timerInterval);
   timerInterval=setInterval(()=>{
@@ -1422,20 +1505,20 @@ function playBeep(){
   const o=ctx.createOscillator();o.connect(g);o.frequency.value=880;o.start();o.stop(ctx.currentTime+0.3);
   const o2=ctx.createOscillator();o2.connect(g);o2.frequency.value=1108;o2.start(ctx.currentTime+0.35);o2.stop(ctx.currentTime+0.65);}catch(e){}
 }
-function openMcqPopup(){document.getElementById('cycleMcqs').value='';document.getElementById('mcq-popup-bg').classList.add('visible');}
-function openBreakPopup(){document.getElementById('break-popup-bg').classList.add('visible');}
-function closeDailyPopups(){document.getElementById('mcq-popup-bg').classList.remove('visible');document.getElementById('break-popup-bg').classList.remove('visible');}
+function openMcqPopup(){ document.getElementById('cycleMcqs').value=''; document.getElementById('mcq-popup-bg').classList.add('visible'); }
+function openBreakPopup(){ document.getElementById('break-popup-bg').classList.add('visible'); }
+function closeDailyPopups(){ document.getElementById('mcq-popup-bg').classList.remove('visible'); document.getElementById('break-popup-bg').classList.remove('visible'); }
 function startBreak(){
   const mcqs=parseInt(document.getElementById('cycleMcqs').value)||0;
   saveDailyLog(dailyActiveSub,mcqs,Math.floor(dailyElapsed/60),dailyActivePhase,dailyIsSkipped);
   document.getElementById('mcq-popup-bg').classList.remove('visible');
-  dailyMode='break';dailyIsPaused=false;dailyTimeLeft=parseInt(document.getElementById('breakMins').value)*60;
+  dailyMode='break'; dailyIsPaused=false; dailyTimeLeft=parseInt(document.getElementById('breakMins').value)*60;
   document.getElementById('timer-phase-badge').textContent='☕ Break Time';
   runDailyTimer();
 }
 function continueNextCycle(){
   document.getElementById('break-popup-bg').classList.remove('visible');
-  dailyMode='study';dailyIsPaused=false;dailyIsSkipped=false;dailyTimeLeft=dailyInitDuration;
+  dailyMode='study'; dailyIsPaused=false; dailyIsSkipped=false; dailyTimeLeft=dailyInitDuration;
   document.getElementById('timer-phase-badge').textContent=dailyActivePhase+' — '+dailyActiveSub;
   runDailyTimer();
 }
@@ -1446,7 +1529,7 @@ function saveDailyLog(subject,mcqs,durationMins,phase,skipped){
   localStorage.setItem(DAILY_KEY,JSON.stringify(logs));
   renderDailyUI();
 }
-function clearDailyLogs(){if(confirm('Clear all logs?')){localStorage.removeItem(DAILY_KEY);renderDailyUI();showToast('🗑️ Logs cleared');}}
+function clearDailyLogs(){ if(confirm('Clear all logs?')){localStorage.removeItem(DAILY_KEY);renderDailyUI();showToast('🗑️ Logs cleared');} }
 
 // ── DAILY UI ──────────────────────────────────────────────
 let lastDailyRender=0;
@@ -1498,7 +1581,7 @@ function renderDailyCharts(logs){
   hChart=new Chart(hCtx,{type:'bar',data:{labels,datasets:[{data:hrsData,backgroundColor:'rgba(66,165,245,0.6)',borderColor:'#42A5F5',borderWidth:1,borderRadius:3}]},options:JSON.parse(JSON.stringify(opts))});
   mChart=new Chart(mCtx,{type:'bar',data:{labels,datasets:[{data:mcqData,backgroundColor:'rgba(76,175,80,0.6)',borderColor:'#4CAF50',borderWidth:1,borderRadius:3}]},options:JSON.parse(JSON.stringify(opts))});
 }
-function changeViewMonth(dir){currentViewDate=new Date(currentViewDate.getFullYear(),currentViewDate.getMonth()+dir,1);renderDailyCharts();}
+function changeViewMonth(dir){ currentViewDate=new Date(currentViewDate.getFullYear(),currentViewDate.getMonth()+dir,1); renderDailyCharts(); }
 
 // ── TOAST ─────────────────────────────────────────────────
 let toastTimer;
